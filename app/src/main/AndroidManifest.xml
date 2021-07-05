@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="Bondidos.rsshool2021_android_task_pomodoro">
+    package="bondidos.rsshool2021_android_task_pomodoro">
 
     <application
         android:allowBackup="true"
@@ -9,7 +9,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.RSShool2021AndroidtaskPomodoro">
-        <activity android:name=".MainActivity">
+        <activity android:name="bondidos.rsshool2021_android_task_pomodoro.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
