@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">RSShool2021-Android-task-Pomodoro</string>
+    <string name="add_stopwatch">Add Stopwatch</string>
+    <string name="_00_00_00_00">00:00:00:00</string>
 </resources>
