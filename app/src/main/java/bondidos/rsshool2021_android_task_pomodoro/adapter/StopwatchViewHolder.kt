@@ -1,28 +1,63 @@
 package bondidos.rsshool2021_android_task_pomodoro.adapter
 
+import android.content.res.Resources
+import android.graphics.drawable.AnimationDrawable
 import android.os.CountDownTimer
+import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
+import bondidos.rsshool2021_android_task_pomodoro.R
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.StopwatchItemBinding
 
 class StopwatchViewHolder(
-
+    private val listener: StopwatchListener,                            // экземпляр интерфейса для передачи действия в Мэйн
+    private val resources: Resources,                                   //  Для доступа к ресурсам приложения
     private val binding: StopwatchItemBinding                           // передаем во ViewHolder сгенерированный класс байдинга для разметки элемента
                                                                         // RecyclerView
-
     ): RecyclerView.ViewHolder(binding.root) {                              // передаем ссылку на View данного элемента RecyclerView
-    fun bind (stopwatch: Stopwatch){                                 //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
-                                                                        // onBindViewHolder адаптера и содержит актуальные параметры для данного элемента списка.
-        binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()  //  пока просто выводим время секундомера.
-        if (stopwatch.isStarted) startTimer(stopwatch)                      // если у объекта stopwatch флаг isStarted = true, начать отсчёт
-    }
 
     private var timer: CountDownTimer? = null                           // экземпляр класса предоставляющий обратный отчёт
 
+    fun bind (stopwatch: Stopwatch){                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
+                                                                        // onBindViewHolder адаптера и содержит актуальные параметры для данного элемента списка.
+        binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()  //  пока просто выводим время секундомера.
+        if (stopwatch.isStarted)
+            startTimer(stopwatch)                                           // если у объекта stopwatch флаг isStarted = true, начать отсчёт
+        else stopTimer(stopwatch)
+        initButtonsListeners(stopwatch)
+    }
+
+    private fun initButtonsListeners(stopwatch: Stopwatch){                 // назначем лиссенеры и действия кнопкам
+        binding.startPauseButton.setOnClickListener {
+            if(stopwatch.isStarted)
+                listener.stop(stopwatch.id, stopwatch.currentMs)
+            else
+                listener.start(stopwatch.id)
+        }
+        binding.restartButton.setOnClickListener { listener.reset(stopwatch.id) }
+        binding.deleteButton.setOnClickListener { listener.delete(stopwatch.id) }
+    }
+
     private fun startTimer(stopwatch: Stopwatch){
+        val drawable = resources.getDrawable(R.drawable.ic_baseline_pause_24)
+        binding.startPauseButton.setImageDrawable(drawable)             // меняем иконку кнопки
+
         timer?.cancel()                                                 // Отмена отсчёта
         timer = getCountTimer(stopwatch)                                // получаем экземпляр таймера ( с сохранённым отсчётом )
         timer?.start()                                                  // Старт отсчёта
+
+        binding.blinkingIndicator.isInvisible = false                           // включаем анимацию индикатора
+        (binding.blinkingIndicator.background as? AnimationDrawable)?.start()
+    }
+
+    private fun stopTimer(stopwatch: Stopwatch){
+        val drawable = resources.getDrawable(R.drawable.ic_baseline_play_arrow_24) // меняем иконку кнопки
+        binding.startPauseButton.setImageDrawable(drawable)
+
+        timer?.cancel()
+
+        binding.blinkingIndicator.isInvisible = false                           // выключаем анимацию индикатора
+        (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()
     }
 
     private fun getCountTimer(stopwatch: Stopwatch): CountDownTimer{

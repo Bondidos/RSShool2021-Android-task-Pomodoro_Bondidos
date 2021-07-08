@@ -7,12 +7,14 @@ import androidx.recyclerview.widget.DiffUtil
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.StopwatchItemBinding
 
-class StopwatchAdapter: ListAdapter<Stopwatch, StopwatchViewHolder>(itemComparator) {
+class StopwatchAdapter(
+    private val listener: StopwatchListener
+): ListAdapter<Stopwatch, StopwatchViewHolder>(itemComparator) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopwatchViewHolder{     // инфлейтим View и возвращаем созданный ViewHolder
         val layoutInflater = LayoutInflater.from(parent.context)
         val binding = StopwatchItemBinding.inflate(layoutInflater,parent,false)
-        return StopwatchViewHolder(binding)
+        return StopwatchViewHolder(listener, binding.root.context.resources,binding)
     }
     override fun onBindViewHolder(holder: StopwatchViewHolder,position: Int){                   // вызывается в момент создания айтема, в моменты пересоздания
                                                                                                 // (например, айтем вышел за пределы экрана, затем вернулся) и
@@ -33,6 +35,8 @@ class StopwatchAdapter: ListAdapter<Stopwatch, StopwatchViewHolder>(itemComparat
                 return oldItem.currentMs == newItem.currentMs &&
                         oldItem.isStarted == newItem.isStarted
             }
+
+            override fun getChangePayload(oldItem: Stopwatch, newItem: Stopwatch) = Any()
         }
     }
 }
