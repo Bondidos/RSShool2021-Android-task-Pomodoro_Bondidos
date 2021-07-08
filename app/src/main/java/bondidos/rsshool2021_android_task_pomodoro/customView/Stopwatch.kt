@@ -1,4 +1,4 @@
-package bondidos.rsshool2021_android_task_pomodoro
+package bondidos.rsshool2021_android_task_pomodoro.customView
 
 data class Stopwatch(
     val id: Int,

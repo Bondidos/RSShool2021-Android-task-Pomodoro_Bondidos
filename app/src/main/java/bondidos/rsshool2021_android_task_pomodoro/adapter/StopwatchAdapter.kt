@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
-import bondidos.rsshool2021_android_task_pomodoro.Stopwatch
+import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.StopwatchItemBinding
 
 class StopwatchAdapter: ListAdapter<Stopwatch, StopwatchViewHolder>(itemComparator) {

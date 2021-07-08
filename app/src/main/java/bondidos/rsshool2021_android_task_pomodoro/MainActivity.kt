@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.recyclerview.widget.LinearLayoutManager
 import bondidos.rsshool2021_android_task_pomodoro.adapter.StopwatchAdapter
+import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -25,7 +26,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         binding.addNewStopwatchButton.setOnClickListener {
-            stopwatches.add(Stopwatch(nextId++,0,false))    // добавляем созданный таймер в список
+            stopwatches.add(Stopwatch(nextId++,0,true))    // добавляем созданный таймер в список
             stopwatchAdapter.submitList(stopwatches.toList())                // передаём список с таймерамы в RecyclerView
         }
     }
