@@ -71,5 +71,32 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <bondidos.rsshool2021_android_task_pomodoro.customView.CustomView
+            android:id="@+id/custom_view_one"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_margin="10dp"
+            android:padding="8dp"
+            app:custom_color="@color/purple_500"
+            app:custom_style="stroke"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/stopwatch_timer"
+            app:layout_constraintEnd_toStartOf="@id/start_pause_button"
+            />
+        <bondidos.rsshool2021_android_task_pomodoro.customView.CustomView
+            android:id="@+id/custom_view_two"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_margin="10dp"
+            android:padding="8dp"
+            app:custom_color="@color/purple_700"
+            app:custom_style="fill"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toEndOf="@id/stopwatch_timer"
+            app:layout_constraintEnd_toStartOf="@id/start_pause_button"
+            />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
