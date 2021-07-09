@@ -50,19 +50,11 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
     }
 
     private fun changeStopwatch (id: Int, currentMs: Long?, isStarted: Boolean){
-        //val newTimers = mutableListOf<Stopwatch>()
         stopwatches.forEach{                                                                    // находим требуемый таймер в списке и копируем newTimers изменяя его на новые установки
             if(it.id == id){
-                //val buffer = it.currentMs
-                //stopwatches.remove(it)
-                it.currentMs = currentMs ?: it.currentMs
-                it.isStarted = isStarted
-                //newTimers.add(Stopwatch(it.id, currentMs ?: it.currentMs,isStarted))
-            }// else newTimers.add(it)                                                            // остальыне таймеры просто копируем в newTimers
+                stopwatches[id] = Stopwatch(id,currentMs ?: it.currentMs, isStarted)
+            }                                                          // остальыне таймеры просто копируем в newTimers
         }
-        //stopwatchAdapter.submitList(newTimers)                                                  // применяем созданный список
-        //stopwatches.clear()                                                                     // очищаем неисползующийся список
-        //stopwatches.addAll(newTimers)                                                           // и копируем в него список таймеров
-        stopwatchAdapter.submitList(stopwatches)
+        stopwatchAdapter.submitList(stopwatches.toList())
     }
 }
