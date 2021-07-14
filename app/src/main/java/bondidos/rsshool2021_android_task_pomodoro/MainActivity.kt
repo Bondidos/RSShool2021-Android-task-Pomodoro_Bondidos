@@ -26,7 +26,11 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
             adapter = stopwatchAdapter                                      // задаём адептер
         }
         binding.addNewStopwatchButton.setOnClickListener {
-            stopwatches.add(Stopwatch(nextId++,0,true))    // добавляем созданный таймер в список
+            //todo предусмотреть проверки актуальности вводимых значений
+            val countDownTime = if ((binding.editText.text.toString().toLongOrNull()?: 0) * 60000 <= (24 * 60 * 60000))  // получаем значение в минутах
+            (binding.editText.text.toString().toLongOrNull()?: 0) * 60000
+            else 24 * 60 * 60000
+            stopwatches.add(Stopwatch(nextId++,countDownTime ,false))    // добавляем созданный таймер в список
             stopwatchAdapter.submitList(stopwatches.toList())                // передаём список с таймерамы в RecyclerView
         }
     }

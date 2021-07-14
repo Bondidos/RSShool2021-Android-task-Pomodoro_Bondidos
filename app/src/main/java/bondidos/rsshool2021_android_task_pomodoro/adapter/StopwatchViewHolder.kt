@@ -17,16 +17,16 @@ class StopwatchViewHolder(
     private val resources: Resources,                                   //  Для доступа к ресурсам приложения
     private val binding: StopwatchItemBinding                           // передаем во ViewHolder сгенерированный класс байдинга для разметки элемента
                                                                         // RecyclerView
-    ): RecyclerView.ViewHolder(binding.root) {                              // передаем ссылку на View данного элемента RecyclerView
+    ): RecyclerView.ViewHolder(binding.root) {                          // передаем ссылку на View данного элемента RecyclerView
 
     private var timer: CountDownTimer? = null                           // экземпляр класса предоставляющий обратный отчёт
-    private var current = 0L    //todo for circle
+    private var current = 0L    //todo for circle // start of countdown?
 
     fun bind (stopwatch: Stopwatch){                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
                                                                         // onBindViewHolder адаптера и содержит актуальные параметры для данного элемента списка.
-        binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()  //  пока просто выводим время секундомера.
+        binding.stopwatchTimer.text = stopwatch.currentMs.displayTime() //  пока просто выводим время секундомера.
         if (stopwatch.isStarted)
-            startTimer(stopwatch)                                           // если у объекта stopwatch флаг isStarted = true, начать отсчёт
+            startTimer(stopwatch)                                       // если у объекта stopwatch флаг isStarted = true, начать отсчёт
         else stopTimer(stopwatch)
         initButtonsListeners(stopwatch)
 
@@ -83,8 +83,10 @@ class StopwatchViewHolder(
             val interval = UNIT_TEN_MS
 
             override fun onTick(millisUntilFinished: Long) {
-                stopwatch.currentMs += interval
-                binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()
+                GlobalScope.launch {
+                    stopwatch.currentMs -= interval
+                    binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()
+                }
             }
 
             override fun onFinish() {
