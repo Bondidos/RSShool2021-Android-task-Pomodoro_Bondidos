@@ -25,7 +25,6 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
             layoutManager = LinearLayoutManager(context)                    // лэйаут элементов списка
             adapter = stopwatchAdapter                                      // задаём адептер
         }
-
         binding.addNewStopwatchButton.setOnClickListener {
             stopwatches.add(Stopwatch(nextId++,0,true))    // добавляем созданный таймер в список
             stopwatchAdapter.submitList(stopwatches.toList())                // передаём список с таймерамы в RecyclerView

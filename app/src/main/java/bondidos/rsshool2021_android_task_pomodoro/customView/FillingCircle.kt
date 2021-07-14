@@ -9,7 +9,7 @@ import android.view.View
 import androidx.annotation.AttrRes
 import bondidos.rsshool2021_android_task_pomodoro.R
 
-class CustomView @JvmOverloads constructor(
+class FillingCircle @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     @AttrRes defStyleAttr: Int = 0

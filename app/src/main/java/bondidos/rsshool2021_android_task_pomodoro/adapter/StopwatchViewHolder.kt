@@ -8,6 +8,9 @@ import androidx.recyclerview.widget.RecyclerView
 import bondidos.rsshool2021_android_task_pomodoro.R
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.StopwatchItemBinding
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class StopwatchViewHolder(
     private val listener: StopwatchListener,                            // экземпляр интерфейса для передачи действия в Мэйн
@@ -17,6 +20,7 @@ class StopwatchViewHolder(
     ): RecyclerView.ViewHolder(binding.root) {                              // передаем ссылку на View данного элемента RecyclerView
 
     private var timer: CountDownTimer? = null                           // экземпляр класса предоставляющий обратный отчёт
+    private var current = 0L    //todo for circle
 
     fun bind (stopwatch: Stopwatch){                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
                                                                         // onBindViewHolder адаптера и содержит актуальные параметры для данного элемента списка.
@@ -25,7 +29,21 @@ class StopwatchViewHolder(
             startTimer(stopwatch)                                           // если у объекта stopwatch флаг isStarted = true, начать отсчёт
         else stopTimer(stopwatch)
         initButtonsListeners(stopwatch)
+
+        //todo set period for filling circle
+        binding.customViewOne.setPeriod(PERIOD_CIRCLE)
+        binding.customViewTwo.setPeriod(PERIOD_CIRCLE)
+        //todo courutine for fill circle
+        GlobalScope.launch {
+            while (current < PERIOD_CIRCLE * REPEAT) {
+                current += INTERVAL
+                binding.customViewOne.setCurrent(current)
+                binding.customViewTwo.setCurrent(current)
+                delay(INTERVAL)
+            }
+        }
     }
+
 
     private fun initButtonsListeners(stopwatch: Stopwatch){                 // назначем лиссенеры и действия кнопкам
         binding.startPauseButton.setOnClickListener {
@@ -96,5 +114,11 @@ class StopwatchViewHolder(
         private const val START_TIME = "00:00:00:00"
         private const val UNIT_TEN_MS = 10L
         private const val PERIOD = 1000L * 60L * 60L *24L               // Day
+
+        //todo filling circle
+
+        private const val INTERVAL = 1000L
+        private const val PERIOD_CIRCLE = 1000L * 30 // 30 sec то есть тридцать секунд оборот круга
+        private const val REPEAT = 10 // 10 times
     }
 }

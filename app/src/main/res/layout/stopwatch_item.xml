@@ -72,7 +72,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <bondidos.rsshool2021_android_task_pomodoro.customView.CustomView
+        <bondidos.rsshool2021_android_task_pomodoro.customView.FillingCircle
             android:id="@+id/custom_view_one"
             android:layout_width="24dp"
             android:layout_height="24dp"
@@ -85,7 +85,7 @@
             app:layout_constraintStart_toEndOf="@id/stopwatch_timer"
             app:layout_constraintEnd_toStartOf="@id/start_pause_button"
             />
-        <bondidos.rsshool2021_android_task_pomodoro.customView.CustomView
+        <bondidos.rsshool2021_android_task_pomodoro.customView.FillingCircle
             android:id="@+id/custom_view_two"
             android:layout_width="24dp"
             android:layout_height="24dp"
