@@ -1,10 +1,14 @@
 package bondidos.rsshool2021_android_task_pomodoro.adapter
 
+import android.content.Context
 import android.content.res.Resources
 import android.graphics.drawable.AnimationDrawable
 import android.os.CountDownTimer
+import android.util.Log
+import android.widget.Toast
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
+import bondidos.rsshool2021_android_task_pomodoro.MainActivity
 import bondidos.rsshool2021_android_task_pomodoro.R
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.StopwatchItemBinding
@@ -19,27 +23,34 @@ class StopwatchViewHolder(
                                                                         // RecyclerView
     ): RecyclerView.ViewHolder(binding.root) {                          // передаем ссылку на View данного элемента RecyclerView
 
+    private var period_circle: Long? = null
     private var timer: CountDownTimer? = null                           // экземпляр класса предоставляющий обратный отчёт
     private var current = 0L    //todo for circle // start of countdown?
 
     fun bind (stopwatch: Stopwatch){                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
                                                                         // onBindViewHolder адаптера и содержит актуальные параметры для данного элемента списка.
         binding.stopwatchTimer.text = stopwatch.currentMs.displayTime() //  пока просто выводим время секундомера.
+        period_circle = stopwatch.currentMs
+
+
         if (stopwatch.isStarted)
             startTimer(stopwatch)                                       // если у объекта stopwatch флаг isStarted = true, начать отсчёт
         else stopTimer(stopwatch)
         initButtonsListeners(stopwatch)
 
         //todo set period for filling circle
-        binding.customViewOne.setPeriod(PERIOD_CIRCLE)
-        binding.customViewTwo.setPeriod(PERIOD_CIRCLE)
+        binding.customViewOne.setPeriod(period_circle ?: 0)             // устанавливаем период для заполняющегося круга
+        binding.customViewTwo.setPeriod(period_circle ?: 0)
         //todo courutine for fill circle
+        // таким образом, что бы заставить работать круг в синхронизации с таймером нужно:
+        // - надо установить PERIOD_CIRCLE = stopwatch.currentMs в момент создания таймера
+        // if(stopwatch.isStarted)
         GlobalScope.launch {
-            while (current < PERIOD_CIRCLE * REPEAT) {
-                current += INTERVAL
-                binding.customViewOne.setCurrent(current)
-                binding.customViewTwo.setCurrent(current)
-                delay(INTERVAL)
+            while (current < period_circle ?: 0 && stopwatch.isStarted) {              // пока текущеезначаение меньше периода оборота круга умноженного на количество раз переключения круга
+                current += INTERVAL                                 // интервал добавляем к текущему значению заполнения круга
+                binding.customViewOne.setCurrent(current)           // устанавливаем текущее значение кастомным вью
+                binding.customViewTwo.setCurrent(current)           //
+                delay(INTERVAL)                                     // задержка отрисовки круга
             }
         }
     }
@@ -79,17 +90,18 @@ class StopwatchViewHolder(
     }
 
     private fun getCountTimer(stopwatch: Stopwatch): CountDownTimer{
-        return object : CountDownTimer(PERIOD, UNIT_TEN_MS){            // PERIOD - продолжительность работы, UNIT_TEN_MS - интервал счёта
+        return object : CountDownTimer(period_circle ?: 0, UNIT_TEN_MS){            // PERIOD - продолжительность работы, UNIT_TEN_MS - интервал счёта
             val interval = UNIT_TEN_MS
 
             override fun onTick(millisUntilFinished: Long) {
-                GlobalScope.launch {
+                Log.d("myLogs","countdown started")
                     stopwatch.currentMs -= interval
                     binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()
-                }
+
             }
 
             override fun onFinish() {
+                Log.d("myLogs","countdown finished")
                 binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()
             }
         }
@@ -114,13 +126,13 @@ class StopwatchViewHolder(
 
     companion object{
         private const val START_TIME = "00:00:00:00"
-        private const val UNIT_TEN_MS = 10L
-        private const val PERIOD = 1000L * 60L * 60L *24L               // Day
+        private const val UNIT_TEN_MS = 100L
+        //private const val PERIOD = 1000L * 60L * 60L *24L               // Day
 
         //todo filling circle
 
         private const val INTERVAL = 1000L
-        private const val PERIOD_CIRCLE = 1000L * 30 // 30 sec то есть тридцать секунд оборот круга
-        private const val REPEAT = 10 // 10 times
+        //private const val PERIOD_CIRCLE = 1000L * 30 // 30 sec то есть тридцать секунд оборот круга
+
     }
 }
