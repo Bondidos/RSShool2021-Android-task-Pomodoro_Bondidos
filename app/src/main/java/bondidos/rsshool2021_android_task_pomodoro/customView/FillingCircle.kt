@@ -1,12 +1,14 @@
 package bondidos.rsshool2021_android_task_pomodoro.customView
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import androidx.annotation.AttrRes
+import androidx.appcompat.widget.ThemeUtils
 import bondidos.rsshool2021_android_task_pomodoro.R
 
 class FillingCircle @JvmOverloads constructor(

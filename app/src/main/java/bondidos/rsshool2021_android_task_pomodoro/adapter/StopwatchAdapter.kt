@@ -19,7 +19,13 @@ class StopwatchAdapter(
     override fun onBindViewHolder(holder: StopwatchViewHolder,position: Int){                   // вызывается в момент создания айтема, в моменты пересоздания
                                                                                                 // (например, айтем вышел за пределы экрана, затем вернулся) и
                                                                                                 //в моменты обновления айтемов (этим у нас занимается DiffUtil)
-        holder.bind(getItem(position))                                                          // для конкретного ViewHolder обновляем параметры
+
+        holder.bind(getItem(position))
+
+        if(getItem(position).isStarted) {
+            holder.setIsRecyclable(false)
+        }
+
     }
 
     private companion object {
