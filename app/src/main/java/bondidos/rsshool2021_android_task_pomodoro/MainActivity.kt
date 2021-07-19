@@ -1,18 +1,21 @@
 package bondidos.rsshool2021_android_task_pomodoro
 
-import android.content.IntentSender
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.CountDownTimer
 import androidx.recyclerview.widget.LinearLayoutManager
+import bondidos.rsshool2021_android_task_pomodoro.CountDown.CDTimer
 import bondidos.rsshool2021_android_task_pomodoro.adapter.StopwatchAdapter
-import bondidos.rsshool2021_android_task_pomodoro.adapter.StopwatchListener
+import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity(), StopwatchListener {
 
      private lateinit var binding: ActivityMainBinding
-
+        //https://github.com/android/uamp/blob/main/app/src/main/java/com/example/android/uamp/MediaItemData.kt
+     private lateinit var timer: CDTimer
+     //
      private val stopwatchAdapter = StopwatchAdapter(this)
      private val stopwatches = mutableListOf<Stopwatch>()
      private var nextId = 0
@@ -26,26 +29,44 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
             layoutManager = LinearLayoutManager(context)                    // лэйаут элементов списка
             adapter = stopwatchAdapter                                      // задаём адептер
         }
+
         binding.addNewStopwatchButton.setOnClickListener {
             //todo предусмотреть проверки актуальности вводимых значений
             val countDownTime = if ((binding.editText.text.toString().toLongOrNull()?: 0) * 60000 <= (24 * 60 * 60000))  // получаем значение в минутах
             (binding.editText.text.toString().toLongOrNull()?: 0) * 60000
             else 24 * 60 * 60000
-            stopwatches.add(Stopwatch(nextId++,countDownTime ,false, false))    // добавляем созданный таймер в список
+            stopwatches.add(Stopwatch(nextId++,countDownTime ,countDownTime,isStarted = false,isFinished = false))    // добавляем созданный таймер в список
             stopwatchAdapter.submitList(stopwatches.toList())                // передаём список с таймерамы в RecyclerView
         }
+
+        timer = CDTimer()  /** Создаём экземпляр "Многоразового таймера" */
+
     }
+    /**----------------------------------------Inwork---------------------------------------*/
+    /** todo Задача старт отсчёта и изменение списка ресайклера*/
 
     override fun start(id: Int) {
-        changeStopwatch(id,null, isStarted = true, isFinished = false)
+
+        timer.startTimer(stopwatches[id],stopwatchAdapter,stopwatches)
+        //stopwatchAdapter.submitList(stopwatches.toList())
+
+        //val changed = timer.startTimer(stopwatches[id])
+
+        //changeStopwatch(changed)
     }
 
-    override fun stop(id: Int, currentMs: Long) {
-        changeStopwatch(id,currentMs, isStarted = false, isFinished = false)
+
+    /**---------------------------------------InWork----------------------------------------*/
+
+
+
+
+    override fun stop(id: Int) {
+       // changeStopwatch(id,currentMs, isStarted = false, isFinished = false)
     }
 
-    override fun reset(id: Int,timerStartValue: Long) {
-        changeStopwatch(id,timerStartValue, isStarted = false, isFinished = false)
+    override fun reset(id: Int) {
+       // changeStopwatch(id,timerStartValue, isStarted = false, isFinished = false)
     }
 
     override fun delete(id: Int) {
@@ -54,11 +75,18 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
     }
 
     override fun fin(id: Int) {
-        changeStopwatch(id,null, isStarted = false, isFinished = true)
+        changeStopwatch(stopwatches[id])
     }
-    private fun changeStopwatch (id: Int, currentMs: Long?, isStarted: Boolean, isFinished: Boolean){
+    private fun changeStopwatch (stopwatch: Stopwatch/*id: Int, currentMs: Long?, isStarted: Boolean, isFinished: Boolean*/){
         stopwatches.forEach {
-            when(isStarted){
+
+            //if(it.id == stopwatch.id)
+
+
+
+
+
+           /* when(isStarted){
                 isStarted -> {
                     if (it.isStarted) {
                         stopwatches[it.id] = Stopwatch(it.id, it.currentMs, false, isFinished)
@@ -68,8 +96,9 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
                     }
                 }
                 !isStarted-> stopwatches[id] = Stopwatch(id, currentMs ?: it.currentMs, isStarted, isFinished)
-            }
+            }*/
         }
         stopwatchAdapter.submitList(stopwatches.toList())
     }
+
 }

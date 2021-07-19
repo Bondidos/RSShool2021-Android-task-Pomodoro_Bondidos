@@ -1,12 +1,12 @@
-package bondidos.rsshool2021_android_task_pomodoro.adapter
+package bondidos.rsshool2021_android_task_pomodoro.Interfacies
 
 interface StopwatchListener {
 
     fun start(id: Int)
 
-    fun stop(id: Int, currentMs: Long)
+    fun stop(id: Int)
 
-    fun reset(id: Int,timerStartValue: Long)
+    fun reset(id: Int)
 
     fun delete(id: Int)
 
