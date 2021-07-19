@@ -129,7 +129,7 @@ class StopwatchViewHolder(
      * по прибытии обновлённого stopwatch срисовываем его current в textView в заданном формате
      * */
 
-    private fun setCurrentMs(stopwatch: Stopwatch){
+     fun setCurrentMs(stopwatch: Stopwatch){
         binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()
         Log.d(myLogs,"setCurrentMs ${stopwatch.currentMs} displayTime ${stopwatch.currentMs.displayTime()}")
     }
@@ -176,6 +176,9 @@ class StopwatchViewHolder(
         }
     }
 
+    init{
+        //initButtonsListeners(binding.root)
+    }
     companion object{
         private const val START_TIME = "00:00:00:00"
         private const val STEP_MS = 1000L

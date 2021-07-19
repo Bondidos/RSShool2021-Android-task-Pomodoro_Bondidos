@@ -1,5 +1,6 @@
 package bondidos.rsshool2021_android_task_pomodoro.adapter
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
@@ -10,7 +11,7 @@ import bondidos.rsshool2021_android_task_pomodoro.databinding.StopwatchItemBindi
 
 class StopwatchAdapter(
     private val listener: StopwatchListener
-): ListAdapter<Stopwatch, StopwatchViewHolder>(itemComparator) {
+): ListAdapter<Stopwatch, StopwatchViewHolder>(Stopwatch.itemComparator) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopwatchViewHolder{     // инфлейтим View и возвращаем созданный ViewHolder
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -24,12 +25,15 @@ class StopwatchAdapter(
 
         val stopwatchItem = getItem(position)
         var fullRefresh = payloads.isEmpty()
-
+        Log.d("myLogs", "onBindViewHolder (BIG) payloads:${fullRefresh}")
         if(payloads.isNotEmpty()){
             payloads.forEach{ payload ->
                 when(payload){
-                    PLAYBACK_RES_CHANGED -> {
-                        stopwatchItem.currentMs = payload as Long
+                    Stopwatch.ITEM_RES_CHANGED -> {
+                        //todo !!!!!!!!
+                        Log.d("myLogs", "ITEM_RES_CHANGED case in adapter")
+                        holder.setCurrentMs(stopwatchItem)
+                        //stopwatchItem.currentMs = stop.
                     }
                     else -> fullRefresh = true
                 }
@@ -37,23 +41,30 @@ class StopwatchAdapter(
         }
 
         if(fullRefresh){
-            //holder.item = mediaItem
+            Log.d("myLogs", "Full refresh in adapter")
+            holder.bind(getItem(position))
+            // here we should to do full refresh of data
+            //holder.setCurrentMs(stopwatchItem)
         }
 
-        holder.bind(getItem(position))
 
+/*
         if(getItem(position).isStarted) {
             holder.setIsRecyclable(false)
-        }
-
-
+        }*/
 
     }
 
-    private companion object {
-        /**
+    override fun onBindViewHolder(holder: StopwatchViewHolder, position: Int) {
+        //holder.bind(getItem(position))
+        Log.d("myLogs", "onBindViewHolder(second) in adapter")
+        onBindViewHolder(holder, position, mutableListOf())
+    }
+
+    /*private companion object {
+        *//**
          * Indicates [playbackRes] has changed.
-         */
+         *//*
         const val PLAYBACK_RES_CHANGED = 1
 
         private val itemComparator = object : DiffUtil.ItemCallback<Stopwatch>(){               // Имплементация DiffUtil помогает понять RecyclerView какой айтем
@@ -75,9 +86,5 @@ class StopwatchAdapter(
                 } else null
             }
         }
-    }
-
-    override fun onBindViewHolder(holder: StopwatchViewHolder, position: Int) {
-        onBindViewHolder(holder, position, mutableListOf())
-    }
+    }*/
 }
