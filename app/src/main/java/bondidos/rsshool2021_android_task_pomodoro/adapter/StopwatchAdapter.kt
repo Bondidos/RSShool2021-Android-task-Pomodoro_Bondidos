@@ -5,9 +5,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.RecyclerView
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.StopwatchItemBinding
+import kotlinx.coroutines.runBlocking
 
 class StopwatchAdapter(
     private val listener: StopwatchListener
@@ -23,16 +25,24 @@ class StopwatchAdapter(
                                                                                                 // (например, айтем вышел за пределы экрана, затем вернулся) и
                                                                                                 //в моменты обновления айтемов (этим у нас занимается DiffUtil)
 
+
         val stopwatchItem = getItem(position)
         var fullRefresh = payloads.isEmpty()
-        Log.d("myLogs", "onBindViewHolder (BIG) payloads:${fullRefresh}")
+
+       /* if(stopwatchItem.isStarted)
+            holder.setIsRecyclable(false)
+        }*/
+       // Log.d("myLogs", "onBindViewHolder (BIG) payloads:${fullRefresh}")
+
+      //  payloads.forEach {Log.d("myLogs", "payloads item: $it")  }
         if(payloads.isNotEmpty()){
             payloads.forEach{ payload ->
                 when(payload){
-                    Stopwatch.ITEM_RES_CHANGED -> {
-                        //todo !!!!!!!!
-                        Log.d("myLogs", "ITEM_RES_CHANGED case in adapter")
+                    Stopwatch.ITEM_MS_CHANGED -> {
+                       // Log.d("myLogs", "ITEM_MS_CHANGED case in adapter")
                         holder.setCurrentMs(stopwatchItem)
+                       // stopwatchItem.isStarted = true
+                        runBlocking { holder.stepFillingCircle() }
                         //stopwatchItem.currentMs = stop.
                     }
                     else -> fullRefresh = true
@@ -41,19 +51,12 @@ class StopwatchAdapter(
         }
 
         if(fullRefresh){
+
+            holder.bind(stopwatchItem)
             Log.d("myLogs", "Full refresh in adapter")
-            holder.bind(getItem(position))
-            // here we should to do full refresh of data
-            //holder.setCurrentMs(stopwatchItem)
         }
 
-
-/*
-        if(getItem(position).isStarted) {
-            holder.setIsRecyclable(false)
-        }*/
-
-    }
+}
 
     override fun onBindViewHolder(holder: StopwatchViewHolder, position: Int) {
         //holder.bind(getItem(position))
@@ -61,30 +64,4 @@ class StopwatchAdapter(
         onBindViewHolder(holder, position, mutableListOf())
     }
 
-    /*private companion object {
-        *//**
-         * Indicates [playbackRes] has changed.
-         *//*
-        const val PLAYBACK_RES_CHANGED = 1
-
-        private val itemComparator = object : DiffUtil.ItemCallback<Stopwatch>(){               // Имплементация DiffUtil помогает понять RecyclerView какой айтем
-                                                                                                    // изменился (был удален, добавлен) и контент какого айтема изменился
-                                                                                                // - чтобы правильно проиграть анимацию и показать результат пользователю
-            override fun areItemsTheSame(oldItem: Stopwatch, newItem: Stopwatch): Boolean {     // лучше проверять на равество только те параметры модели, которые влияют
-                                                                                                // на её визуальное представление на экране.
-                return oldItem.id == newItem.id
-            }
-
-            override fun areContentsTheSame(oldItem: Stopwatch, newItem: Stopwatch): Boolean {
-                return oldItem.currentMs == newItem.currentMs &&
-                        oldItem.isStarted == newItem.isStarted
-            }
-
-            override fun getChangePayload(oldItem: Stopwatch, newItem: Stopwatch) {
-                if(oldItem.currentMs != newItem.currentMs) {
-                PLAYBACK_RES_CHANGED
-                } else null
-            }
-        }
-    }*/
 }

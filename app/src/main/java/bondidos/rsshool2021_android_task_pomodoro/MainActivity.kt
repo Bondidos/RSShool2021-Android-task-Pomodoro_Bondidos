@@ -8,8 +8,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import bondidos.rsshool2021_android_task_pomodoro.CountDown.CDTimer
 import bondidos.rsshool2021_android_task_pomodoro.adapter.StopwatchAdapter
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
+import bondidos.rsshool2021_android_task_pomodoro.adapter.StopwatchViewHolder
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.ActivityMainBinding
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity(), StopwatchListener {
 
@@ -20,6 +23,8 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
      private val stopwatchAdapter = StopwatchAdapter(this)
      private val stopwatches = mutableListOf<Stopwatch>()
      private var nextId = 0
+     private var isTimerStarted = false
+    private var startedStopwatchID = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,8 +46,6 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
             stopwatchAdapter.submitList(stopwatches.toList())                // передаём список с таймерамы в RecyclerView
         }
 
-
-
     }
     /**----------------------------------------Inwork---------------------------------------*/
     /** todo Задача старт отсчёта и изменение списка ресайклера*/
@@ -53,30 +56,39 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         timer?.cancel()                                                 // Отмена отсчёта
         timer = getCountTimer(stopwatch)                                // получаем экземпляр таймера ( с сохранённым отсчётом )
         timer?.start()                                                  // Старт отсчёта
-
+        isTimerStarted = stopwatch.isStarted
+        startedStopwatchID = stopwatch.id
     }
 
     private fun stopTimer(stopwatch: Stopwatch){
-        stopwatch.isStarted = false
+
         timer?.cancel()
+        stopwatch.isStarted = false
+        changeStopwatch(stopwatch.copy())
+    }
+    private fun resetTimer(stopwatch: Stopwatch){
+
+        timer?.cancel()
+        stopwatch.isStarted = false
+        stopwatch.currentMs = stopwatch.msInFuture
+        Log.d("myLogs","resetTimerMain current: ${stopwatch.currentMs}, inFuture: ${stopwatch.msInFuture}")
+        changeStopwatch(stopwatch.copy())
+        stopwatchAdapter.notifyItemChanged(stopwatches.indexOf(stopwatch))
+        isTimerStarted = stopwatch.isStarted
+        startedStopwatchID = -1
     }
 
     private fun getCountTimer(stopwatch: Stopwatch): CountDownTimer{
-        return object : CountDownTimer(stopwatch.msInFuture, STEP_MS){            // PERIOD - продолжительность работы, UNIT_TEN_MS - интервал счёта
-
+        return object : CountDownTimer(stopwatch.currentMs, STEP_MS){            // PERIOD - продолжительность работы, UNIT_TEN_MS - интервал счёта
 
             override fun onTick(millisUntilFinished: Long) {
-                Log.d("myLogs","onTick = started")
-                val watch = Stopwatch(stopwatch.id,stopwatch.msInFuture,millisUntilFinished,true,false)
-                Log.d("myLogs","${watch.currentMs} listItem = ${stopwatches[stopwatch.id].currentMs}")
-
-                //watch.currentMs = millisUntilFinished
-                stopwatches[watch.id] = watch
-                stopwatchAdapter.submitList(stopwatches.toList())
-               // changeStopwatch(stopwatch)
-
+                //Log.d("myLogs","onTick = started")
+                if(stopwatch.isStarted) {
+                    // Log.d("myLogs","${watch.currentMs} listItem = ${stopwatches[stopwatch.id].currentMs}")
+                    stopwatch.currentMs = millisUntilFinished
+                    changeStopwatch(stopwatch.copy())
+                }
             }
-
             override fun onFinish() {
 
             }
@@ -85,15 +97,14 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
 
 
     override fun start(id: Int) {
-        Log.d("myLogs","buttonStart")
-        startTimer(stopwatches[id])
-        //timer.startTimer(stopwatches[id],stopwatchAdapter,stopwatches)
-        //stopwatchAdapter.submitList(stopwatches.toList())
+        Log.d("myLogs","buttonStart(Main)")
 
-        //val changed = timer.startTimer(stopwatches[id])
-
-        //changeStopwatch(changed)
-    }
+        if(startedStopwatchID != id){
+            stopTimer(requireNotNull(stopwatches.find { it.id == id }))
+            startTimer(requireNotNull(stopwatches.find { it.id == id }))
+        }
+            else  startTimer(requireNotNull(stopwatches.find { it.id == id }))
+        }
 
     /**---------------------------------------InWork----------------------------------------*/
 
@@ -101,48 +112,41 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
 
 
     override fun stop(id: Int) {
-        Log.d("myLogs","stopBTN")
-        stopTimer(stopwatches[id])
-       // changeStopwatch(id,currentMs, isStarted = false, isFinished = false)
-    }
+        Log.d("myLogs","stopBTN(Main)")
+        stopTimer(requireNotNull(stopwatches.find { it.id == id }))
+            }
 
     override fun reset(id: Int) {
-       // changeStopwatch(id,timerStartValue, isStarted = false, isFinished = false)
+        //resetTimer(requireNotNull(stopwatches.find { it.id == id }))
+        val item = requireNotNull(stopwatches.find { it.id == id })
+        item.currentMs=item.msInFuture
+        stopTimer(item)
+
     }
 
     override fun delete(id: Int) {
+
+
+        stopTimer(requireNotNull(stopwatches.find { it.id == id }))
         stopwatches.remove(stopwatches.find { it.id == id })
         stopwatchAdapter.submitList(stopwatches.toList())
+
     }
 
     override fun fin(id: Int) {
         changeStopwatch(stopwatches[id])
     }
     private fun changeStopwatch (stopwatch: Stopwatch/*id: Int, currentMs: Long?, isStarted: Boolean, isFinished: Boolean*/){
-        stopwatches.forEach {
 
-            if(it.id == stopwatch.id)
-                stopwatches[it.id] = stopwatch
-
-
-
-
-           /* when(isStarted){
-                isStarted -> {
-                    if (it.isStarted) {
-                        stopwatches[it.id] = Stopwatch(it.id, it.currentMs, false, isFinished)
-                    }
-                    if (it.id == id) {
-                        stopwatches[it.id] = Stopwatch(id, currentMs ?: it.currentMs, isStarted, isFinished)
+                stopwatches.forEach{
+                    if(it.id == stopwatch.id) {
+                        stopwatches[stopwatches.indexOf(it)] = stopwatch
                     }
                 }
-                !isStarted-> stopwatches[id] = Stopwatch(id, currentMs ?: it.currentMs, isStarted, isFinished)
-            }*/
-        }
-        stopwatchAdapter.submitList(stopwatches.toList())
+                stopwatchAdapter.submitList(stopwatches.toList())
     }
     companion object{
-        private const val STEP_MS = 10L
+        private const val STEP_MS = 1000L
     }
 }
 /**

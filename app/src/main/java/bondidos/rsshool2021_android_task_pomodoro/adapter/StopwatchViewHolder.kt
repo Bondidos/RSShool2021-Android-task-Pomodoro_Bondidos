@@ -4,6 +4,7 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.util.Log
+import android.widget.TextView
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
@@ -19,7 +20,19 @@ class StopwatchViewHolder(
                                                                         // RecyclerView
     ): RecyclerView.ViewHolder(binding.root) {                          // передаем ссылку на View данного элемента RecyclerView
 
-    private var current = 0L                                             //todo for circle // start of countdown?
+    var current = 0L                                             //todo for circle // start of countdown?
+    /** пробую новый холдер*/
+    /**--------------------------------------------------*/
+
+
+
+    /**-------------------------------------------------------*/
+    val startPauseButton = binding.startPauseButton
+    val restartButton = binding.restartButton
+    val blinkingIndicator = binding.blinkingIndicator
+    val deleteButton = binding.deleteButton
+    val customViewOne = binding.customViewOne
+    val customViewTwo = binding.customViewTwo
 
     fun bind (stopwatch: Stopwatch){                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
 
@@ -32,12 +45,10 @@ class StopwatchViewHolder(
          * 4 - проверить логику отрисовки текущего значения
          * 5 - Отрисовка мигающего кружка. Довести до ума
          * */
-        Log.d(myLogs,"bindHolder")
-        stopwatchManager(stopwatch)                                                                 /** Реализация пункта 1  _DONE_
-                                                                                                    *   Реализация пункта 2  _DONE_
-                                                                                                    *   Реализация пункта 3  _DONE_
-                                                                                                    *   Реализация пункта 4  _DONE_
-                                                                                                    *   Реализация пункта 5  !_DONE_*/
+       // Log.d(myLogs,"bindHolder")
+       // stopwatchManager(stopwatch)
+       // binding.startPauseButton.isActivated = false
+        initFillingCircle(stopwatch.currentMs)
 
 
         setCurrentMs(stopwatch)                                                                     // отображаем текущее значение таймера
@@ -52,7 +63,7 @@ class StopwatchViewHolder(
             /** Если stopwatch таймер только что создан, то заполняющийся кружок нуждается в
              * инициализации периода и если холдер переиспользуется то сброс кружка на начальное
              * состояние, то есть на ноль*/
-            stopwatch.currentMs == 0L -> initFillingCircle(stopwatch.msInFuture)                    // инициализация и сброс кружка
+           // stopwatch.currentMs == 0L -> initFillingCircle(stopwatch.msInFuture)                    // инициализация и сброс кружка
 
             stopwatch.isStarted -> {                                                                // if isStarted
 
@@ -70,19 +81,19 @@ class StopwatchViewHolder(
 
     }
 
-    private fun startTimer(){
+    fun startTimer(){
         /** Так как холдер будет обновляться раз в 10мс, то надо предусмотреть случай, если отсчёт уже запущен.
          * То есть нам не нужно включать анимацию и менять иконку кнопки старт/стоп */
-        if (!binding.blinkingIndicator.isActivated) {                                               // проверяем статус индикатора (запущен или нет)
+        //if (!binding.blinkingIndicator.isActivated) {                                               // проверяем статус индикатора (запущен или нет)
             val drawable = resources.getDrawable(R.drawable.ic_baseline_pause_24)                   // находим иконку паузы
             binding.startPauseButton.setImageDrawable(drawable)                                     // меняем иконку кнопки пока идёт отсчёт
 
             binding.blinkingIndicator.isInvisible = false                                           // включаем отображение индикатора
             (binding.blinkingIndicator.background as? AnimationDrawable)?.start()                   // включаем анимацию индикатора
-        }
+      //  }
     }
 
-    private fun stopTimer(){
+    fun stopTimer(){
         val drawable = resources.getDrawable(R.drawable.ic_baseline_play_arrow_24)                  // меняем иконку кнопки
         binding.startPauseButton.setImageDrawable(drawable)
 
@@ -90,7 +101,7 @@ class StopwatchViewHolder(
         (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()                        // выключаем анимацию индикатора
     }
 
-    private fun initFillingCircle(msInFuture: Long){
+    fun initFillingCircle(msInFuture: Long){
         if(current != 0L)
             current = 0L
 
@@ -101,7 +112,7 @@ class StopwatchViewHolder(
         binding.customViewTwo.setCurrent(current)
     }
 
-    private suspend fun stepFillingCircle() = withContext(Dispatchers.Default){                     // suspend функция. Шаг круга отрисовки
+    suspend fun stepFillingCircle() = withContext(Dispatchers.Default){                     // suspend функция. Шаг круга отрисовки
         current += STEP_MS
         binding.customViewOne.setCurrent(current)
         binding.customViewTwo.setCurrent(current)
@@ -131,7 +142,7 @@ class StopwatchViewHolder(
 
      fun setCurrentMs(stopwatch: Stopwatch){
         binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()
-        Log.d(myLogs,"setCurrentMs ${stopwatch.currentMs} displayTime ${stopwatch.currentMs.displayTime()}")
+        //Log.d(myLogs,"setCurrentMs ${stopwatch.currentMs} displayTime ${stopwatch.currentMs.displayTime()}")
     }
 
     private fun Long.displayTime(): String{                             // данный метод расширения для Long конвертирует текущее значение таймера в миллисекундах
@@ -156,29 +167,31 @@ class StopwatchViewHolder(
      * */
     private fun initButtonsListeners(stopwatch: Stopwatch){                 // назначем лиссенеры и действия кнопкам
         binding.startPauseButton.setOnClickListener {
-            if(stopwatch.isStarted) {
-                Log.d(myLogs,"startPauseButton")
-                listener.stop(stopwatch.id)
-            }
-            else {
-                Log.d(myLogs,"startPauseButton")
+
+            if(!binding.startPauseButton.isActivated) {
                 listener.start(stopwatch.id)
+                startTimer()
+                binding.startPauseButton.isActivated = true
+            } else {
+                listener.stop(stopwatch.id)
+                stopTimer()
+                binding.startPauseButton.isActivated = false
             }
+
         }
 
         binding.restartButton.setOnClickListener {
-            Log.d(myLogs,"restartButton")
+            Log.d(myLogs,"restartButton(Holder)")
             listener.reset(stopwatch.id)
+            stopTimer()
+            binding.startPauseButton.isActivated = false
         }
         binding.deleteButton.setOnClickListener {
-            Log.d(myLogs,"deleteButton")
+            Log.d(myLogs,"deleteButton(Holder)")
             listener.delete(stopwatch.id)
         }
     }
 
-    init{
-        //initButtonsListeners(binding.root)
-    }
     companion object{
         private const val START_TIME = "00:00:00:00"
         private const val STEP_MS = 1000L
