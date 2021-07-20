@@ -6,6 +6,7 @@ import android.os.CountDownTimer
 import android.util.Log
 import androidx.recyclerview.widget.LinearLayoutManager
 import bondidos.rsshool2021_android_task_pomodoro.CountDown.CDTimer
+import bondidos.rsshool2021_android_task_pomodoro.Interfacies.MainListener
 import bondidos.rsshool2021_android_task_pomodoro.adapter.StopwatchAdapter
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
 import bondidos.rsshool2021_android_task_pomodoro.adapter.StopwatchViewHolder
@@ -20,16 +21,19 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         //https://github.com/android/uamp/blob/main/app/src/main/java/com/example/android/uamp/MediaItemData.kt
      private var timer: CountDownTimer? = null                           // экземпляр класса предоставляющий обратный отчёт
      //
-     private val stopwatchAdapter = StopwatchAdapter(this)
+     private lateinit var stopwatchAdapter : StopwatchAdapter
      private val stopwatches = mutableListOf<Stopwatch>()
      private var nextId = 0
      private var isTimerStarted = false
     private var startedStopwatchID = -1
+   // private lateinit var listener: MainListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        stopwatchAdapter = StopwatchAdapter(this,stopwatches)
 
         binding.recycler.apply {                                            // задаём параметры RecyclerList
             layoutManager = LinearLayoutManager(context)                    // лэйаут элементов списка
@@ -98,29 +102,35 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
 
     override fun start(id: Int) {
         Log.d("myLogs","buttonStart(Main)")
-
         if(startedStopwatchID != id){
             stopTimer(requireNotNull(stopwatches.find { it.id == id }))
             startTimer(requireNotNull(stopwatches.find { it.id == id }))
+           // listener.startButtonFire()
         }
             else  startTimer(requireNotNull(stopwatches.find { it.id == id }))
+        //stopwatchAdapter.hol
+       // startTimer(stopwatches[id])
+        //startTimer(stopwatches[])
+
+
+
         }
-
-    /**---------------------------------------InWork----------------------------------------*/
-
-
 
 
     override fun stop(id: Int) {
+
         Log.d("myLogs","stopBTN(Main)")
+        //stopTimer(stopwatches[id])
         stopTimer(requireNotNull(stopwatches.find { it.id == id }))
+       // stopTimer(stopwatchAdapter.getItemId(id) ?: )
+
             }
 
     override fun reset(id: Int) {
-        //resetTimer(requireNotNull(stopwatches.find { it.id == id }))
-        val item = requireNotNull(stopwatches.find { it.id == id })
-        item.currentMs=item.msInFuture
-        stopTimer(item)
+        resetTimer(requireNotNull(stopwatches.find { it.id == id }))
+       // val item = requireNotNull(stopwatches.find { it.id == id })
+       // item.currentMs=item.msInFuture
+        //stopTimer(item)
 
     }
 
@@ -132,6 +142,7 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         stopwatchAdapter.submitList(stopwatches.toList())
 
     }
+    /**---------------------------------------InWork----------------------------------------*/
 
     override fun fin(id: Int) {
         changeStopwatch(stopwatches[id])

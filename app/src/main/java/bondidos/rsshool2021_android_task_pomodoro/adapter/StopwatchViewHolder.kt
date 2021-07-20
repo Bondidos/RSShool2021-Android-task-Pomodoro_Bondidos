@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.TextView
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
+import bondidos.rsshool2021_android_task_pomodoro.Interfacies.MainListener
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
 import bondidos.rsshool2021_android_task_pomodoro.R
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
@@ -18,7 +19,7 @@ class StopwatchViewHolder(
     private val resources: Resources,                                   //  Для доступа к ресурсам приложения
     private val binding: StopwatchItemBinding                           // передаем во ViewHolder сгенерированный класс байдинга для разметки элемента
                                                                         // RecyclerView
-    ): RecyclerView.ViewHolder(binding.root) {                          // передаем ссылку на View данного элемента RecyclerView
+    ): RecyclerView.ViewHolder(binding.root){                          // передаем ссылку на View данного элемента RecyclerView
 
     var current = 0L                                             //todo for circle // start of countdown?
     /** пробую новый холдер*/
@@ -33,6 +34,9 @@ class StopwatchViewHolder(
     val deleteButton = binding.deleteButton
     val customViewOne = binding.customViewOne
     val customViewTwo = binding.customViewTwo
+    var runFlag =false
+   // var stopwatch: Stopwatch? =null
+
 
     fun bind (stopwatch: Stopwatch){                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
 
@@ -50,15 +54,14 @@ class StopwatchViewHolder(
        // binding.startPauseButton.isActivated = false
         initFillingCircle(stopwatch.currentMs)
 
-
-        setCurrentMs(stopwatch)                                                                     // отображаем текущее значение таймера
-        initButtonsListeners(stopwatch)                                                             /** инициализация кнопок*/
+       // setCurrentMs(stopwatch)                                                                     // отображаем текущее значение таймера
+        //initButtonsListeners(stopwatch)                                                             /** инициализация кнопок*/
 
 
        // binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()                             //  пока просто выводим время секундомера.
     }
 
-    private fun stopwatchManager(stopwatch: Stopwatch){
+        private fun stopwatchManager(stopwatch: Stopwatch){
         when{
             /** Если stopwatch таймер только что создан, то заполняющийся кружок нуждается в
              * инициализации периода и если холдер переиспользуется то сброс кружка на начальное
@@ -121,14 +124,14 @@ class StopwatchViewHolder(
     /**  3 - Смена фона stopwatch если isFinished && stopwatch.currentMs != 0L
      *   если нет, то
      * */
-    private fun changeBackgroundToRed(){
+    fun changeBackgroundToRed(){
         binding.root.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.blinkingIndicator.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.startPauseButton.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.restartButton.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.deleteButton.setBackgroundColor(resources.getColor(R.color.red_second))
     }
-    private fun changeBackgroundToStandard(){
+    fun changeBackgroundToStandard(){
         binding.root.setBackgroundColor(Color.WHITE)
         binding.blinkingIndicator.setBackgroundColor(Color.WHITE)
         binding.startPauseButton.setBackgroundColor(Color.WHITE)
@@ -168,33 +171,32 @@ class StopwatchViewHolder(
     private fun initButtonsListeners(stopwatch: Stopwatch){                 // назначем лиссенеры и действия кнопкам
         binding.startPauseButton.setOnClickListener {
 
-            if(!binding.startPauseButton.isActivated) {
+            if(!runFlag) {
                 listener.start(stopwatch.id)
                 startTimer()
-                binding.startPauseButton.isActivated = true
+                runFlag = true
             } else {
                 listener.stop(stopwatch.id)
                 stopTimer()
-                binding.startPauseButton.isActivated = false
+                runFlag = false
             }
-
         }
 
         binding.restartButton.setOnClickListener {
-            Log.d(myLogs,"restartButton(Holder)")
-            listener.reset(stopwatch.id)
-            stopTimer()
-            binding.startPauseButton.isActivated = false
+
         }
         binding.deleteButton.setOnClickListener {
             Log.d(myLogs,"deleteButton(Holder)")
-            listener.delete(stopwatch.id)
+           // listener.delete(stopwatch.id)
         }
     }
+
+
 
     companion object{
         private const val START_TIME = "00:00:00:00"
         private const val STEP_MS = 1000L
         private const val myLogs = "myLogs"
     }
+
 }
