@@ -4,12 +4,14 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import bondidos.rsshool2021_android_task_pomodoro.Interfacies.MainListener
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
+import bondidos.rsshool2021_android_task_pomodoro.MainActivity
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.StopwatchItemBinding
 import kotlinx.coroutines.runBlocking
-import java.lang.Exception
 
 class StopwatchAdapter(
     private val listener: StopwatchListener,
@@ -23,97 +25,34 @@ class StopwatchAdapter(
         val layoutInflater = LayoutInflater.from(parent.context)
         val binding = StopwatchItemBinding.inflate(layoutInflater,parent,false)
         val holder = StopwatchViewHolder(listener, binding.root.context.resources,binding)
-        val position = holder.layoutPosition
-
-
-        fun List<Stopwatch>.find(position: Int): Stopwatch{
-            return this.find { it.adapterPosition == position } ?: throw Exception ("exception in onCreateHolder")
-        }
-        val item = getItem(position+1)
-      //  val stopwatchItem = stopwatches.find(getItemId(position).toInt())
-
-        //https://devcolibri.com/unit/%d1%83%d1%80%d0%be%d0%ba-10-%d1%80%d0%b0%d0%b1%d0%be%d1%82%d0%b0-%d1%81-recyclerview-%d0%bd%d0%b0-%d0%bf%d1%80%d0%b8%d0%bc%d0%b5%d1%80%d0%b5-tweetsrecyclerview-2/#link1
-
-        /**---------------------------------------------- */
-        with(holder) {
-            startPauseButton.setOnClickListener {
-                if(adapterPosition!=RecyclerView.NO_POSITION) {
-                    if (item.isStarted) {
-                        stopTimer(item)
-                        Log.d("myLogs", "stop(holder)")
-
-                    } else {
-                        startTimer(item)
-                        Log.d("myLogs", "start(holder)")
-                    }
-                }
-            }
-
-            deleteButton.setOnClickListener {
-                if(adapterPosition!=RecyclerView.NO_POSITION) {
-                    Log.d("myLogs", "deleteButton(Adapter)")
-                    listener.delete(item)
-                }
-            }
-        }
-
-        /**---------------------------------------------- */
-
-
+        val position = holder.adapterPosition
         return holder
-    }
-
-    override fun onViewRecycled(holder: StopwatchViewHolder) {
-        holder.current= 0L
-        holder.changeBackgroundToStandard()
-
-        super.onViewRecycled(holder)
     }
 
 
     override fun onBindViewHolder(holder: StopwatchViewHolder,position: Int, payloads: MutableList<Any>){                   // вызывается в момент создания айтема, в моменты пересоздания
         val stopwatchItem = getItem(position)
+        //var fullRefresh = payloads.isEmpty()
+       // if(!payloads.isEmpty()) {
+            if (stopwatchItem.isStarted) {
+                holder.setIsRecyclable(false)
+                holder.setCurrentMs(stopwatchItem)
+                runBlocking { holder.stepFillingCircle() }
+          //  }
+        }   else holder.setIsRecyclable(true)
 
-        /** инициализация холдера, один раз по идее в момент добавления в холдер */
-        if(stopwatchItem.currentMs == stopwatchItem.msInFuture && !stopwatchItem.isFinished){
-            stopwatchItem.adapterPosition = holder.adapterPosition
-            holder.bind(stopwatchItem)
-        }
-
-        /** запускаем отсчёт таймера по нажатию кнопки */ //todo после ресет а пропускает одну секунду счёта
-        if (stopwatchItem.isStarted) {
-            holder.setCurrentMs(stopwatchItem)
-            runBlocking { holder.stepFillingCircle() }
-            if(stopwatchItem.isFinished){
-                holder.changeBackgroundToStandard()
-                stopwatchItem.isFinished = false
-            }
-        }
-
-        /** тут я хочу сделать остановку таймера без кнопки*/
-        if(!stopwatchItem.isStarted && stopwatchItem.isStartedByButton){
+        if(!stopwatchItem.isStarted && holder.runFlag){
             holder.stopTimer(stopwatchItem)
-
         }
-
-        /** действия при завершении отсчёта таймера*/
         if(stopwatchItem.isFinished){
-            Log.d("myLogs", "isFinished in adapter")
-            listener.reset(stopwatchItem)
-
             holder.changeBackgroundToRed()
-            holder.startPauseButton.text = "START"
-            holder.bind(stopwatchItem)
-
         }
 
 
-
-        /*if(stopwatchItem.currentMs == stopwatchItem.msInFuture) {
+        if(stopwatchItem.currentMs == stopwatchItem.msInFuture) {
             holder.bind(stopwatchItem)
             Log.d("myLogs", "Full refresh in adapter")
-        }*/
-
+        }
 /*
 
         with(holder){
@@ -187,9 +126,5 @@ class StopwatchAdapter(
         //holder.bind(getItem(position))
         Log.d("myLogs", "onBindViewHolder(second) in adapter")
         onBindViewHolder(holder, position, mutableListOf())
-    }
-
-    override fun getItemCount(): Int {
-        return stopwatches.size
     }
 }

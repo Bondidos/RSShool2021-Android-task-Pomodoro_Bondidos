@@ -4,8 +4,10 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.util.Log
+import android.widget.TextView
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
+import bondidos.rsshool2021_android_task_pomodoro.Interfacies.MainListener
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
 import bondidos.rsshool2021_android_task_pomodoro.R
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
@@ -20,46 +22,43 @@ class StopwatchViewHolder(
     ): RecyclerView.ViewHolder(binding.root) {                          // передаем ссылку на View данного элемента RecyclerView
 
     var current = 0L                                             //todo for circle // start of countdown?
-
     /** пробую новый холдер*/
     /**--------------------------------------------------*/
 
 
     /**-------------------------------------------------------*/
     val startPauseButton = binding.startPauseButton
+    val restartButton = binding.restartButton
     val blinkingIndicator = binding.blinkingIndicator
     val deleteButton = binding.deleteButton
     val customViewOne = binding.customViewOne
     val customViewTwo = binding.customViewTwo
-    var isStarted = false
-    var stopwatch_: Stopwatch? = null
-    val stopwatch get() = requireNotNull(stopwatch_)
-
+    var runFlag = false
 
 
     fun bind(stopwatch: Stopwatch) {                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
 
         /** инициализация при первом БИНД*/
 
-           // initButtonsListeners(stopwatch)
+            initButtonsListeners(stopwatch)
             initFillingCircle(stopwatch.msInFuture)
             binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()
-            stopwatch_ = stopwatch
+
 
 
     //  пока просто выводим время секундомера.
     }
 
-    fun startTimer(stopwatch: Stopwatch) {
+    private fun startTimer(stopwatch: Stopwatch) {
         /** Так как холдер будет обновляться раз в 10мс, то надо предусмотреть случай, если отсчёт уже запущен.
          * То есть нам не нужно включать анимацию и менять иконку кнопки старт/стоп */
         //if (!binding.blinkingIndicator.isActivated) {                                               // проверяем статус индикатора (запущен или нет)
 
         listener.start(stopwatch)
-        stopwatch.isStartedByButton = true
-        isStarted = true
+        runFlag = true
 
-        binding.startPauseButton.text = "STOP"                                  // меняем иконку кнопки пока идёт отсчёт
+        val drawable = resources.getDrawable(R.drawable.ic_baseline_pause_24)                   // находим иконку паузы
+        binding.startPauseButton.setImageDrawable(drawable)                                     // меняем иконку кнопки пока идёт отсчёт
         binding.blinkingIndicator.isInvisible = false                                           // включаем отображение индикатора
         (binding.blinkingIndicator.background as? AnimationDrawable)?.start()                   // включаем анимацию индикатора
         //  }
@@ -68,10 +67,10 @@ class StopwatchViewHolder(
     fun stopTimer(stopwatch: Stopwatch) {
 
         listener.stop(stopwatch)
-        stopwatch.isStartedByButton = false
-        isStarted = false
+        runFlag = false
 
-        binding.startPauseButton.text = "START"
+        val drawable = resources.getDrawable(R.drawable.ic_baseline_play_arrow_24)                  // меняем иконку кнопки
+        binding.startPauseButton.setImageDrawable(drawable)
         binding.blinkingIndicator.isInvisible = true                                                // выключаем отображение индикатора
         (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()                        // выключаем анимацию индикатора
     }
@@ -100,12 +99,16 @@ class StopwatchViewHolder(
     fun changeBackgroundToRed() {
         binding.root.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.blinkingIndicator.setBackgroundColor(resources.getColor(R.color.red_second))
+        binding.startPauseButton.setBackgroundColor(resources.getColor(R.color.red_second))
+        binding.restartButton.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.deleteButton.setBackgroundColor(resources.getColor(R.color.red_second))
     }
 
     fun changeBackgroundToStandard() {
         binding.root.setBackgroundColor(Color.WHITE)
         binding.blinkingIndicator.setBackgroundColor(Color.WHITE)
+        binding.startPauseButton.setBackgroundColor(Color.WHITE)
+        binding.restartButton.setBackgroundColor(Color.WHITE)
         binding.deleteButton.setBackgroundColor(Color.WHITE)
     }
 
@@ -149,7 +152,11 @@ class StopwatchViewHolder(
                 Log.d("myLogs","start(holder)")
             }
         }
-
+        restartButton.setOnClickListener {
+            listener.reset(stopwatch)
+            stopTimer(stopwatch)
+            Log.d("myLogs","restartButton(Adapter)")
+        }
         deleteButton.setOnClickListener {
             Log.d("myLogs","deleteButton(Adapter)")
             listener.delete(stopwatch)
