@@ -33,6 +33,26 @@ class StopwatchAdapter(
     override fun onBindViewHolder(holder: StopwatchViewHolder,position: Int, payloads: MutableList<Any>){                   // вызывается в момент создания айтема, в моменты пересоздания
         val stopwatchItem = getItem(position)
         //var fullRefresh = payloads.isEmpty()
+       // if(!payloads.isEmpty()) {
+            if (stopwatchItem.isStarted) {
+                holder.setIsRecyclable(false)
+                holder.setCurrentMs(stopwatchItem)
+                runBlocking { holder.stepFillingCircle() }
+          //  }
+        }   else holder.setIsRecyclable(true)
+
+        if(!stopwatchItem.isStarted && holder.runFlag){
+            holder.stopTimer(stopwatchItem)
+        }
+        if(stopwatchItem.isFinished){
+            holder.changeBackgroundToRed()
+        }
+
+
+        if(stopwatchItem.currentMs == stopwatchItem.msInFuture) {
+            holder.bind(stopwatchItem)
+            Log.d("myLogs", "Full refresh in adapter")
+        }
 /*
 
         with(holder){
@@ -98,8 +118,7 @@ class StopwatchAdapter(
             Log.d("myLogs", "Full refresh in adapter")
         }*/
 
-        Log.d("myLogs", "Full refresh in adapter")
-        holder.bind(stopwatchItem)
+
 }
 
 

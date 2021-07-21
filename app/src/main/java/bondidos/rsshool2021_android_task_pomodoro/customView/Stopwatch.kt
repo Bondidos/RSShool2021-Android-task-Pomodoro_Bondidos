@@ -35,7 +35,8 @@ data class Stopwatch(
                 oldItem.currentMs == newItem.currentMs && oldItem.id == newItem.id
             }
 
-            override fun getChangePayload(oldItem: Stopwatch, newItem: Stopwatch) =if (oldItem.currentMs != newItem.currentMs)  ITEM_MS_CHANGED else null
+            override fun getChangePayload(oldItem: Stopwatch, newItem: Stopwatch) =
+                if (oldItem.currentMs != newItem.currentMs)  ITEM_MS_CHANGED else null
 
                 /*val result = mutableListOf<Any>()
                 if (oldItem.isStarted != newItem.isStarted) {
