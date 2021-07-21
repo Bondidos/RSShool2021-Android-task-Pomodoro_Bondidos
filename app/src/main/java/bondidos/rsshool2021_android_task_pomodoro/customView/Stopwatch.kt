@@ -12,9 +12,13 @@ data class Stopwatch(
     var isFinished: Boolean     /** отсчёт закончен*/
 ){
      companion object {
-
+        /**
+         * Indicates [playbackRes] has changed.
+         */
          const val ITEM_MS_CHANGED = 1
-
+         const val ITEM_STARTED_CHANGE = 2
+         const val ITEM_FINISHED = 3
+         const val ITEM_FUTURE_MS_CHANGED = 4
 
          val itemComparator = object : DiffUtil.ItemCallback<Stopwatch>(){               // Имплементация DiffUtil помогает понять RecyclerView какой айтем
             // изменился (был удален, добавлен) и контент какого айтема изменился
@@ -31,8 +35,20 @@ data class Stopwatch(
                 oldItem.currentMs == newItem.currentMs && oldItem.id == newItem.id
             }
 
-            override fun getChangePayload(oldItem: Stopwatch, newItem: Stopwatch) =
-                if (oldItem.currentMs != newItem.currentMs) ITEM_MS_CHANGED else null
+            override fun getChangePayload(oldItem: Stopwatch, newItem: Stopwatch) =if (oldItem.currentMs != newItem.currentMs)  ITEM_MS_CHANGED else null
+
+                /*val result = mutableListOf<Any>()
+                if (oldItem.isStarted != newItem.isStarted) {
+                    result.add(ITEM_FINISHED)
+                }*/
+              //  if (oldItem.currentMs != newItem.currentMs)                     ITEM_MS_CHANGED
+
+                /*if (oldItem.isFinished != newItem.isFinished) {
+                    result.add(ITEM_FINISHED)
+                }*/
+                // else -> null
+                /*return  result*/
+
         }
    }
 }
