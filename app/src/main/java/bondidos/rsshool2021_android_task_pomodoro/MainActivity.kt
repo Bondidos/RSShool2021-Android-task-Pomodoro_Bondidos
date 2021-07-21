@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import bondidos.rsshool2021_android_task_pomodoro.CountDown.CDTimer
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.MainListener
@@ -61,26 +62,26 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         timer?.cancel()                                                 // Отмена отсчёта
         timer = getCountTimer(stopwatch)                                // получаем экземпляр таймера ( с сохранённым отсчётом )
         timer?.start()                                                  // Старт отсчёта
-        isTimerStarted = true
+        isTimerStarted = stopwatch.isStarted
         startedStopwatchID = stopwatch.id
     }
 
     private fun stopTimer(stopwatch: Stopwatch){
-
         timer?.cancel()
         stopwatch.isStarted = false
-        changeStopwatch(stopwatch.copy())
+        startedStopwatchID = -1
+        isTimerStarted = stopwatch.isStarted
+        changeStopwatch(stopwatch)
     }
     private fun resetTimer(stopwatch: Stopwatch){
-
         timer?.cancel()
         stopwatch.isStarted = false
         stopwatch.currentMs = stopwatch.msInFuture
         Log.d("myLogs","resetTimerMain current: ${stopwatch.currentMs}, inFuture: ${stopwatch.msInFuture}")
-        changeStopwatch(stopwatch.copy())
-        stopwatchAdapter.notifyItemChanged(stopwatches.indexOf(stopwatch))
         isTimerStarted = stopwatch.isStarted
         startedStopwatchID = -1
+        changeStopwatch(stopwatch)
+        //stopwatchAdapter.notifyItemChanged(stopwatches.indexOf(stopwatch))
     }
 
 
@@ -88,77 +89,68 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         return object : CountDownTimer(stopwatch.currentMs, STEP_MS){            // PERIOD - продолжительность работы, UNIT_TEN_MS - интервал счёта
 
             override fun onTick(millisUntilFinished: Long) {
-                //Log.d("myLogs","onTick = started")
-
-                    // Log.d("myLogs","${watch.currentMs} listItem = ${stopwatches[stopwatch.id].currentMs}")
-                    stopwatch.currentMs = millisUntilFinished
-
-                changeStopwatch(stopwatch.copy())
+                // Log.d("myLogs","${watch.currentMs} listItem = ${stopwatches[stopwatch.id].currentMs}")
+                stopwatch.currentMs = millisUntilFinished
+                changeStopwatch(stopwatch)
             }
             override fun onFinish() {
-
+        
             }
         }
     }
 
 
-    override fun start(id: Int) {
+    override fun start(stopwatch: Stopwatch) {
         Log.d("myLogs","buttonStart(Main)")
-        if(startedStopwatchID != id && isTimerStarted){
-          //  val oldStartedTimer = requireNotNull(stopwatches.find { it.id == startedStopwatchID })
-            stopTimer(requireNotNull(stopwatches.find { it.id == startedStopwatchID }))//stoping old timer
+        if(startedStopwatchID == -1)
+            startTimer(stopwatch)
+        else {
+           try {
+               stopTimer(stopwatches.findById(startedStopwatchID))             //stoping old timer
+               }
+           catch(c: Exception){
+               Log.d("myLogs","$c id: $startedStopwatchID")
+               Toast.makeText(this,"$c, id $startedStopwatchID",Toast.LENGTH_SHORT).show()
 
-
-            startTimer(requireNotNull(stopwatches.find { it.id == id }))                //starting new timer
-           // listener.startButtonFire()
-        }
-            else  startTimer(requireNotNull(stopwatches.find { it.id == id }))
-
-        //stopwatchAdapter.hol
-       // startTimer(stopwatches[id])
-        //startTimer(stopwatches[])
-
-        }
-
-
-    override fun stop(id: Int) {
-
-        Log.d("myLogs","stopBTN(Main)")
-        //stopTimer(stopwatches[id])
-        stopTimer(requireNotNull(stopwatches.find { it.id == id }))
-       // stopTimer(stopwatchAdapter.getItemId(id) ?: )
-
+           }
+            startTimer(stopwatch)                                        //starting new timer
             }
+        }
 
-    override fun reset(id: Int) {
-        resetTimer(requireNotNull(stopwatches.find { it.id == id }))
-       // val item = requireNotNull(stopwatches.find { it.id == id })
-       // item.currentMs=item.msInFuture
-        //stopTimer(item)
 
+    override fun stop(stopwatch: Stopwatch) {
+        Log.d("myLogs","stopBTN(Main)")
+        stopTimer(stopwatch)
     }
 
-    override fun delete(id: Int) {
+    override fun reset(stopwatch: Stopwatch) {
+        resetTimer(stopwatch)
+    }
 
-        val item = requireNotNull(stopwatches.find { it.id == id })
-        timer?.cancel()
-        stopwatches.remove(item)
+    override fun delete(stopwatch: Stopwatch) {
+        if(startedStopwatchID == stopwatch.id){
+            timer?.cancel()
+            startedStopwatchID = -1
+        }
+        stopwatches.remove(stopwatch)
         stopwatchAdapter.submitList(stopwatches.toList())
 
     }
     /**---------------------------------------InWork----------------------------------------*/
 
-    override fun fin(id: Int) {
-        changeStopwatch(stopwatches[id])
-    }
-    private fun changeStopwatch (stopwatch: Stopwatch/*id: Int, currentMs: Long?, isStarted: Boolean, isFinished: Boolean*/){
+    override fun fin(stopwatch: Stopwatch) {
 
-                stopwatches.forEach{
-                    if(it.id == stopwatch.id) {
-                        stopwatches[stopwatches.indexOf(it)] = stopwatch
-                    }
-                }
-                stopwatchAdapter.submitList(stopwatches.toList())
+    }
+
+    private fun MutableList<Stopwatch>.findById(id: Int) = this.find { it.id == id } ?: throw Exception ("ItemNotFound")
+
+    private fun changeStopwatch (stopwatch: Stopwatch){
+
+            stopwatches[stopwatches.indexOf(stopwatches.find {
+                it.id == stopwatch.id
+            })] = stopwatch.copy()
+            stopwatchAdapter.submitList(stopwatches.toList())
+
     }
     companion object{
         private const val STEP_MS = 1000L

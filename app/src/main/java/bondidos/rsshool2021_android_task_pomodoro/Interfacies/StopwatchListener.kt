@@ -4,14 +4,14 @@ import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 
 interface StopwatchListener {
 
-    fun start(id: Int)
+    fun start(stopwatch: Stopwatch)
 
-    fun stop(id: Int)
+    fun stop(stopwatch: Stopwatch)
 
-    fun reset(id: Int)
+    fun reset(stopwatch: Stopwatch)
 
-    fun delete(id: Int)
+    fun delete(stopwatch: Stopwatch)
 
     // todo fun finish uses for change color of finished count view
-    fun fin(id: Int)
+    fun fin(stopwatch: Stopwatch)
 }
