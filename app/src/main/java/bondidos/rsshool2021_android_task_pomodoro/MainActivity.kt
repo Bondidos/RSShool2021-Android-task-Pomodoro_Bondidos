@@ -35,10 +35,11 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         setContentView(binding.root)
 
         stopwatchAdapter = StopwatchAdapter(this,stopwatches)
+        stopwatchAdapter.setHasStableIds(true)
 
         binding.recycler.apply {                                            // задаём параметры RecyclerList
             layoutManager = LinearLayoutManager(context)                    // лэйаут элементов списка
-            adapter = stopwatchAdapter                                      // задаём адептер
+            adapter = stopwatchAdapter
 
         }
 
@@ -49,7 +50,14 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
             else 24 * 60 * 60000*/
             val countDownTime = 2000L
             Log.d("myLogs","addneSW pushed. $countDownTime")
-            stopwatches.add(Stopwatch(nextId++,countDownTime ,countDownTime,isStarted = false,isFinished = false))    // добавляем созданный таймер в список
+            stopwatches.add(Stopwatch(nextId++,
+                isStartedByButton = false,
+                -10,
+                countDownTime,
+                countDownTime,
+                isStarted = false,
+                isFinished = false
+            ))    // добавляем созданный таймер в список
             stopwatchAdapter.submitList(stopwatches.toList())                // передаём список с таймерамы в RecyclerView
         }
 
@@ -99,7 +107,7 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
                 stopwatch.isFinished = true
                 stopwatch.isStarted = false
                 changeStopwatch(stopwatch)
-                stopwatchAdapter.notifyItemChanged(stopwatch.id)
+                //stopwatchAdapter.notifyItemChanged(stopwatch.adapterPosition)
             }
         }
     }
@@ -107,18 +115,21 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
 
     override fun start(stopwatch: Stopwatch) {
         Log.d("myLogs","buttonStart(Main)")
-        if(startedStopwatchID == -1)
-            startTimer(stopwatch)
+
+        if(startedStopwatchID == -1 && !isTimerStarted)              /** проверяем есть ли запущенный таймер */
+            startTimer(stopwatch)                                   /** т.к. нет запущенный таймеров, запускаем отсчёт таймера по нажатию кнопки */
         else {
            try {
-               stopTimer(stopwatches.findById(startedStopwatchID))             //stoping old timer
+               val startedItem = stopwatches.findById(startedStopwatchID)
+               stopTimer(startedItem)              /** иначе, находим запущенный таймер  и останавливаем его*/
+               //stopwatchAdapter.notifyItemChanged(startedItem.adapterPosition)
                }
            catch(c: Exception){
                Log.d("myLogs","$c id: $startedStopwatchID")
                Toast.makeText(this,"$c, id $startedStopwatchID",Toast.LENGTH_SHORT).show()
 
            }
-            startTimer(stopwatch)                                        //starting new timer
+            startTimer(stopwatch)                                         /** запускаем отсчёт таймера по нажатию кнопки */
             }
         }
 
@@ -160,6 +171,6 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
 
     }
     companion object{
-        private const val STEP_MS = 1000L
+        private const val STEP_MS = 100L
     }
 }

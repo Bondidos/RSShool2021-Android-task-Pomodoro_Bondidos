@@ -4,10 +4,8 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.util.Log
-import android.widget.TextView
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
-import bondidos.rsshool2021_android_task_pomodoro.Interfacies.MainListener
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
 import bondidos.rsshool2021_android_task_pomodoro.R
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
@@ -22,6 +20,7 @@ class StopwatchViewHolder(
     ): RecyclerView.ViewHolder(binding.root) {                          // передаем ссылку на View данного элемента RecyclerView
 
     var current = 0L                                             //todo for circle // start of countdown?
+
     /** пробую новый холдер*/
     /**--------------------------------------------------*/
 
@@ -32,6 +31,7 @@ class StopwatchViewHolder(
     val deleteButton = binding.deleteButton
     val customViewOne = binding.customViewOne
     val customViewTwo = binding.customViewTwo
+    var isStarted = false
 
 
 
@@ -39,7 +39,7 @@ class StopwatchViewHolder(
 
         /** инициализация при первом БИНД*/
 
-            initButtonsListeners(stopwatch)
+           // initButtonsListeners(stopwatch)
             initFillingCircle(stopwatch.msInFuture)
             binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()
 
@@ -48,12 +48,14 @@ class StopwatchViewHolder(
     //  пока просто выводим время секундомера.
     }
 
-    private fun startTimer(stopwatch: Stopwatch) {
+    fun startTimer(stopwatch: Stopwatch) {
         /** Так как холдер будет обновляться раз в 10мс, то надо предусмотреть случай, если отсчёт уже запущен.
          * То есть нам не нужно включать анимацию и менять иконку кнопки старт/стоп */
         //if (!binding.blinkingIndicator.isActivated) {                                               // проверяем статус индикатора (запущен или нет)
 
         listener.start(stopwatch)
+        stopwatch.isStartedByButton = true
+        isStarted = true
 
         binding.startPauseButton.text = "STOP"                                  // меняем иконку кнопки пока идёт отсчёт
         binding.blinkingIndicator.isInvisible = false                                           // включаем отображение индикатора
@@ -64,6 +66,8 @@ class StopwatchViewHolder(
     fun stopTimer(stopwatch: Stopwatch) {
 
         listener.stop(stopwatch)
+        stopwatch.isStartedByButton = false
+        isStarted = false
 
         binding.startPauseButton.text = "START"
         binding.blinkingIndicator.isInvisible = true                                                // выключаем отображение индикатора
