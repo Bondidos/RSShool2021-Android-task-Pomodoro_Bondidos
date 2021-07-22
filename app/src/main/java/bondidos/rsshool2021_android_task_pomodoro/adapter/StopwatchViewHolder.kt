@@ -28,12 +28,11 @@ class StopwatchViewHolder(
 
     /**-------------------------------------------------------*/
     val startPauseButton = binding.startPauseButton
-    val restartButton = binding.restartButton
     val blinkingIndicator = binding.blinkingIndicator
     val deleteButton = binding.deleteButton
     val customViewOne = binding.customViewOne
     val customViewTwo = binding.customViewTwo
-    var runFlag = false
+
 
 
     fun bind(stopwatch: Stopwatch) {                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
@@ -55,10 +54,8 @@ class StopwatchViewHolder(
         //if (!binding.blinkingIndicator.isActivated) {                                               // проверяем статус индикатора (запущен или нет)
 
         listener.start(stopwatch)
-        runFlag = true
 
-        val drawable = resources.getDrawable(R.drawable.ic_baseline_pause_24)                   // находим иконку паузы
-        binding.startPauseButton.setImageDrawable(drawable)                                     // меняем иконку кнопки пока идёт отсчёт
+        binding.startPauseButton.text = "STOP"                                  // меняем иконку кнопки пока идёт отсчёт
         binding.blinkingIndicator.isInvisible = false                                           // включаем отображение индикатора
         (binding.blinkingIndicator.background as? AnimationDrawable)?.start()                   // включаем анимацию индикатора
         //  }
@@ -67,10 +64,8 @@ class StopwatchViewHolder(
     fun stopTimer(stopwatch: Stopwatch) {
 
         listener.stop(stopwatch)
-        runFlag = false
 
-        val drawable = resources.getDrawable(R.drawable.ic_baseline_play_arrow_24)                  // меняем иконку кнопки
-        binding.startPauseButton.setImageDrawable(drawable)
+        binding.startPauseButton.text = "START"
         binding.blinkingIndicator.isInvisible = true                                                // выключаем отображение индикатора
         (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()                        // выключаем анимацию индикатора
     }
@@ -99,16 +94,12 @@ class StopwatchViewHolder(
     fun changeBackgroundToRed() {
         binding.root.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.blinkingIndicator.setBackgroundColor(resources.getColor(R.color.red_second))
-        binding.startPauseButton.setBackgroundColor(resources.getColor(R.color.red_second))
-        binding.restartButton.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.deleteButton.setBackgroundColor(resources.getColor(R.color.red_second))
     }
 
     fun changeBackgroundToStandard() {
         binding.root.setBackgroundColor(Color.WHITE)
         binding.blinkingIndicator.setBackgroundColor(Color.WHITE)
-        binding.startPauseButton.setBackgroundColor(Color.WHITE)
-        binding.restartButton.setBackgroundColor(Color.WHITE)
         binding.deleteButton.setBackgroundColor(Color.WHITE)
     }
 
@@ -152,11 +143,7 @@ class StopwatchViewHolder(
                 Log.d("myLogs","start(holder)")
             }
         }
-        restartButton.setOnClickListener {
-            listener.reset(stopwatch)
-            stopTimer(stopwatch)
-            Log.d("myLogs","restartButton(Adapter)")
-        }
+
         deleteButton.setOnClickListener {
             Log.d("myLogs","deleteButton(Adapter)")
             listener.delete(stopwatch)

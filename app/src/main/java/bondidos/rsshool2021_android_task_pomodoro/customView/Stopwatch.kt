@@ -31,8 +31,10 @@ data class Stopwatch(
             }
 
             override fun areContentsTheSame(oldItem: Stopwatch, newItem: Stopwatch): Boolean {
-                return oldItem.isStarted == newItem.isStarted &&
-                oldItem.currentMs == newItem.currentMs && oldItem.id == newItem.id
+                return  oldItem.isStarted == newItem.isStarted &&
+                        oldItem.currentMs == newItem.currentMs &&
+                        oldItem.id == newItem.id &&
+                        oldItem.isFinished == newItem.isFinished
             }
 
             override fun getChangePayload(oldItem: Stopwatch, newItem: Stopwatch) =

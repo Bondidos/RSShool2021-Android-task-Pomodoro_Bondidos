@@ -34,25 +34,42 @@ class StopwatchAdapter(
         val stopwatchItem = getItem(position)
         //var fullRefresh = payloads.isEmpty()
        // if(!payloads.isEmpty()) {
-            if (stopwatchItem.isStarted) {
-                holder.setIsRecyclable(false)
-                holder.setCurrentMs(stopwatchItem)
-                runBlocking { holder.stepFillingCircle() }
-          //  }
-        }   else holder.setIsRecyclable(true)
 
-        if(!stopwatchItem.isStarted && holder.runFlag){
-            holder.stopTimer(stopwatchItem)
+        // инициализация холдера.
+        if(stopwatchItem.currentMs == stopwatchItem.msInFuture && !stopwatchItem.isFinished){
+            holder.bind(stopwatchItem)
+        }
+
+        // условия для отсчёта времени todo после ресет а пропускает одну секунду счёта
+        if (stopwatchItem.isStarted) {
+            holder.setCurrentMs(stopwatchItem)
+            runBlocking { holder.stepFillingCircle() }
+            if(stopwatchItem.isFinished){
+                holder.changeBackgroundToStandard()
+                stopwatchItem.isFinished = false
+            }
+        }
+
+        if(!stopwatchItem.isStarted ){
+            //holder.startPauseButton.callOnClick()
         }
         if(stopwatchItem.isFinished){
+            Log.d("myLogs", "isFinished in adapter")
+            listener.reset(stopwatchItem)
+
             holder.changeBackgroundToRed()
+            holder.startPauseButton.text = "START"
+            //holder.bind(stopwatchItem)
+
         }
 
 
-        if(stopwatchItem.currentMs == stopwatchItem.msInFuture) {
+
+        /*if(stopwatchItem.currentMs == stopwatchItem.msInFuture) {
             holder.bind(stopwatchItem)
             Log.d("myLogs", "Full refresh in adapter")
-        }
+        }*/
+
 /*
 
         with(holder){
@@ -126,5 +143,9 @@ class StopwatchAdapter(
         //holder.bind(getItem(position))
         Log.d("myLogs", "onBindViewHolder(second) in adapter")
         onBindViewHolder(holder, position, mutableListOf())
+    }
+
+    override fun getItemCount(): Int {
+        return stopwatches.size
     }
 }
