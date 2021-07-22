@@ -63,6 +63,18 @@ class StopwatchAdapter(
         return holder
     }
 
+    override fun getItemId(position: Int): Long{
+        return position.toLong()
+    }
+
+    override fun onViewRecycled(holder: StopwatchViewHolder) {
+        holder.current= 0L
+       // holder.stopTimer(holder._stopwatch)
+        holder.changeBackgroundToStandard()
+
+        super.onViewRecycled(holder)
+    }
+
     override fun onViewRecycled(holder: StopwatchViewHolder) {
         holder.current= 0L
         holder.changeBackgroundToStandard()
@@ -187,6 +199,10 @@ class StopwatchAdapter(
         //holder.bind(getItem(position))
         Log.d("myLogs", "onBindViewHolder(second) in adapter")
         onBindViewHolder(holder, position, mutableListOf())
+    }
+
+    override fun getItemCount(): Int {
+        return stopwatches.size
     }
 
     override fun getItemCount(): Int {
