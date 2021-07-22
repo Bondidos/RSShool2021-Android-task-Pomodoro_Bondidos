@@ -32,6 +32,8 @@ class StopwatchViewHolder(
     val customViewOne = binding.customViewOne
     val customViewTwo = binding.customViewTwo
     var isStarted = false
+    var stopwatch_: Stopwatch? = null
+    val stopwatch get() = requireNotNull(stopwatch_)
 
 
 
@@ -42,7 +44,7 @@ class StopwatchViewHolder(
            // initButtonsListeners(stopwatch)
             initFillingCircle(stopwatch.msInFuture)
             binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()
-
+            stopwatch_ = stopwatch
 
 
     //  пока просто выводим время секундомера.
