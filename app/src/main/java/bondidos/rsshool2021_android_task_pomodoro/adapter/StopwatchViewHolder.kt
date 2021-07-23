@@ -43,8 +43,6 @@ class StopwatchViewHolder(
 
     //  пока просто выводим время секундомера.
     }
-    fun getAdapterPos() = adapterPosition
-
 
     fun startTimer(stopwatch: Stopwatch) {
         /** Так как холдер будет обновляться раз в 10мс, то надо предусмотреть случай, если отсчёт уже запущен.
@@ -90,15 +88,30 @@ class StopwatchViewHolder(
 
     suspend fun stepFillingCircle() =
         withContext(Dispatchers.Default) {                     // suspend функция. Шаг круга отрисовки
-            current += STEP_MS
+            current += STEP_MS -1L
             binding.customViewOne.setCurrent(current)
             binding.customViewTwo.setCurrent(current)
         }
+     fun finFillingCircle() {
+         binding.customViewOne.setCurrent(current)
+         binding.customViewTwo.setCurrent(current)
+     }
+
+    fun onFinish(stopwatch: Stopwatch){
+        Log.d("myLogs","$stopwatch")
+        stopwatch.currentMs = stopwatch.msInFuture
+        setCurrentMs(stopwatch)
+        current = 0L
+        finFillingCircle()
+        changeBackgroundToRed()
+
+    }
 
     /**  3 - Смена фона stopwatch если isFinished && stopwatch.currentMs != 0L
      *   если нет, то
      * */
     fun changeBackgroundToRed() {
+        binding.startPauseButton.text = "Start"
         binding.root.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.blinkingIndicator.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.deleteButton.setBackgroundColor(resources.getColor(R.color.red_second))

@@ -65,7 +65,6 @@ class StopwatchAdapter(
 
     override fun onViewAttachedToWindow(holder: StopwatchViewHolder) {
         Log.d("myLogs","onViewAttachedToWindow ${holder.current}")
-
         holder.stopwatch.adapterPosition = holder.adapterPosition
         super.onViewAttachedToWindow(holder)
     }
@@ -83,9 +82,7 @@ class StopwatchAdapter(
 
 
         /** Обработка собития конца счёта */
-        if(stopwatchItem.isFinished){
-            holder.changeBackgroundToRed()
-        }
+
         if (stopwatchItem.isStarted && stopwatchItem.isFinished) {
             holder.changeBackgroundToStandard()
             stopwatchItem.isFinished = false
@@ -97,13 +94,15 @@ class StopwatchAdapter(
             payloads.forEach{ payload ->
                 when(payload){
                     TIME_CHANGED -> {
-                        holder.setCurrentMs(stopwatchItem)
-                        runBlocking { holder.stepFillingCircle() }
-                      //  Log.d("myLogs","TIME_CHANGED ${stopwatchItem.adapterPosition} in ${stopwatchItem.currentMs}")
+                        holder.setCurrentMs(stopwatchItem).run{
+                            runBlocking { holder.stepFillingCircle() }
+                        }
+
+                        Log.d("myLogs","TIME_CHANGED ${stopwatchItem.adapterPosition} in ${stopwatchItem.currentMs}")
                     }
                     CHANGE_BUTTON -> {
-                        Log.d("myLogs","CHANGE_BUTTON ${stopwatchItem.adapterPosition} in ${stopwatchItem.currentMs}")
-                        holder.bind(stopwatchItem)
+                        Log.d("myLogs","CHANGE_BUTTON psition: ${stopwatchItem.adapterPosition} in ${stopwatchItem.currentMs}")
+                        holder.onFinish(stopwatchItem)
                     }
                     STOP_OLD  -> {
                         Log.d("myLogs","STOP_OLD ${stopwatchItem.adapterPosition} in ${stopwatchItem.currentMs}")
