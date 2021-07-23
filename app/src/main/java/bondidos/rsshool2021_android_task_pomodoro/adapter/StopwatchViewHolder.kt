@@ -4,10 +4,8 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.AnimationDrawable
 import android.util.Log
-import android.widget.TextView
 import androidx.core.view.isInvisible
 import androidx.recyclerview.widget.RecyclerView
-import bondidos.rsshool2021_android_task_pomodoro.Interfacies.MainListener
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
 import bondidos.rsshool2021_android_task_pomodoro.R
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
@@ -30,7 +28,7 @@ class StopwatchViewHolder(
     private var stopwatch_: Stopwatch? = null
     val stopwatch get() = requireNotNull(stopwatch_)
     var isAnimationStarted = false
-    var current = 0L
+        //var current = 0L
 
     fun bind(stopwatch: Stopwatch) {                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
 
@@ -45,84 +43,87 @@ class StopwatchViewHolder(
     }
 
     fun startTimer(stopwatch: Stopwatch) {
-        /** Так как холдер будет обновляться раз в 10мс, то надо предусмотреть случай, если отсчёт уже запущен.
-         * То есть нам не нужно включать анимацию и менять иконку кнопки старт/стоп */
-        //if (!binding.blinkingIndicator.isActivated) {                                               // проверяем статус индикатора (запущен или нет)
-
+        startAnimation()
         listener.start(stopwatch)
-
         binding.startPauseButton.text = "STOP"
+        Log.d("myLog","startTimer Holder")
+    }
+    fun startAnimation(){
+        Log.d("myLog","startAnimation Holder")
         isAnimationStarted =true
+        if(stopwatch.isFinished) changeBackgroundToStandard()
         binding.blinkingIndicator.isInvisible = false                                           // включаем отображение индикатора
-        (binding.blinkingIndicator.background as? AnimationDrawable)?.start()                   // включаем анимацию индикатора
-        //  }
+        (binding.blinkingIndicator.background as? AnimationDrawable)?.start()
+    }
+    fun stopAnimation(){
+        Log.d("myLog","stopAnimation Holder")
+        isAnimationStarted = false
+        binding.blinkingIndicator.isInvisible = true                                                // выключаем отображение индикатора
+        (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()
     }
 
     fun stopTimer(stopwatch: Stopwatch) {
-
+        Log.d("myLog","stopTimer Holder")
         listener.stop(stopwatch)
-
         binding.startPauseButton.text = "START"
-        isAnimationStarted = false
-        binding.blinkingIndicator.isInvisible = true                                                // выключаем отображение индикатора
-        (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()                        // выключаем анимацию индикатора
+        stopAnimation()                                                                             // выключаем анимацию индикатора
     }
-    fun stopAnimation(stopwatch: Stopwatch){
-        stopwatch.isStarted = false
-        isAnimationStarted = true
+    fun stopOldButton(){
+        Log.d("myLog","stopAnimation Holder")
+        stopAnimation()
         binding.startPauseButton.text = "START"
-        binding.blinkingIndicator.isInvisible = true                                                // выключаем отображение индикатора
-        (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()                        // выключаем анимацию индикатора
     }
-
-
-    fun initFillingCircle(msInFuture: Long) {
-
-
-        binding.customViewOne.setPeriod(msInFuture)                                                 // устанавливаем период для заполняющегося круга
-        binding.customViewTwo.setPeriod(msInFuture)
-
-        binding.customViewOne.setCurrent(current)                                                   // устанавливаем начальное значание
-        binding.customViewTwo.setCurrent(current)
-    }
-
-    suspend fun stepFillingCircle() =
-        withContext(Dispatchers.Default) {                     // suspend функция. Шаг круга отрисовки
-            current += STEP_MS -1L
-            binding.customViewOne.setCurrent(current)
-            binding.customViewTwo.setCurrent(current)
-        }
-     fun finFillingCircle() {
-         binding.customViewOne.setCurrent(current)
-         binding.customViewTwo.setCurrent(current)
-     }
 
     fun onFinish(stopwatch: Stopwatch){
         Log.d("myLogs","$stopwatch")
         stopwatch.currentMs = stopwatch.msInFuture
         setCurrentMs(stopwatch)
-        current = 0L
         finFillingCircle()
         changeBackgroundToRed()
-
+        changeButtonNameToStart()
+        stopAnimation()
+        Log.d("myLog","onFinish Holder")
     }
 
     /**  3 - Смена фона stopwatch если isFinished && stopwatch.currentMs != 0L
      *   если нет, то
      * */
-    fun changeBackgroundToRed() {
+    fun changeButtonNameToStart(){
         binding.startPauseButton.text = "Start"
+    }
+    fun changeBackgroundToRed() {
         binding.root.setBackgroundColor(resources.getColor(R.color.red_second))
-        binding.blinkingIndicator.setBackgroundColor(resources.getColor(R.color.red_second))
+        //binding.blinkingIndicator.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.deleteButton.setBackgroundColor(resources.getColor(R.color.red_second))
     }
 
     fun changeBackgroundToStandard() {
         binding.root.setBackgroundColor(Color.WHITE)
-        binding.blinkingIndicator.setBackgroundColor(Color.WHITE)
+       // binding.blinkingIndicator.setBackgroundColor(Color.WHITE)
         binding.deleteButton.setBackgroundColor(Color.WHITE)
     }
 
+
+
+    fun initFillingCircle(msInFuture: Long) {
+        binding.customViewOne.setPeriod(msInFuture)                                                 // устанавливаем период для заполняющегося круга
+        binding.customViewTwo.setPeriod(msInFuture)
+        val current = stopwatch.msInFuture - stopwatch.currentMs
+        binding.customViewOne.setCurrent(current)                                                   // устанавливаем начальное значание
+        binding.customViewTwo.setCurrent(current)
+    }
+
+    suspend fun stepFillingCircle(stopwatch: Stopwatch) =
+        withContext(Dispatchers.Default) {                     // suspend функция. Шаг круга отрисовки
+            val current = stopwatch.msInFuture - stopwatch.currentMs
+            binding.customViewOne.setCurrent(current)
+            binding.customViewTwo.setCurrent(current)
+        }
+    fun finFillingCircle() {
+        val current = stopwatch.msInFuture - stopwatch.currentMs
+        binding.customViewOne.setCurrent(current)
+        binding.customViewTwo.setCurrent(current)
+    }
     /** 4 - проверить логику отрисовки текущего значения
      * по прибытии обновлённого stopwatch срисовываем его current в textView в заданном формате
      * */
@@ -148,25 +149,6 @@ class StopwatchViewHolder(
         return if (count / 10L > 0) {
             "$count"
         } else "0$count"
-    }
-
-    /**  По нажатию кнопок запускаем соответствующие методы в мэйне
-     * */
-    private fun initButtonsListeners(stopwatch: Stopwatch) {                 // назначем лиссенеры и действия кнопкам
-        startPauseButton.setOnClickListener {
-            if(stopwatch.isStarted) {
-                stopTimer(stopwatch)
-                Log.d("myLogs","stop(holder)")
-
-            } else {
-                startTimer(stopwatch)
-                Log.d("myLogs","start(holder)")
-            }
-        }
-        deleteButton.setOnClickListener {
-            Log.d("myLogs","deleteButton(Adapter)")
-            listener.delete(stopwatch)
-        }
     }
 
     companion object {

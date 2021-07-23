@@ -4,17 +4,11 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
-import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
-import bondidos.rsshool2021_android_task_pomodoro.CountDown.CDTimer
-import bondidos.rsshool2021_android_task_pomodoro.Interfacies.MainListener
 import bondidos.rsshool2021_android_task_pomodoro.adapter.StopwatchAdapter
 import bondidos.rsshool2021_android_task_pomodoro.Interfacies.StopwatchListener
-import bondidos.rsshool2021_android_task_pomodoro.adapter.StopwatchViewHolder
 import bondidos.rsshool2021_android_task_pomodoro.customView.Stopwatch
 import bondidos.rsshool2021_android_task_pomodoro.databinding.ActivityMainBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity(), StopwatchListener {
 
@@ -55,13 +49,11 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
                 isFinished = false
             ))    // добавляем созданный таймер в список
             stopwatchAdapter.submitList(stopwatches.toList())                // передаём список с таймерамы в RecyclerView
-
         }
-
     }
 
     private fun startTimer(stopwatch: Stopwatch){
-        Log.d("myLogs","StartTimer")
+       // Log.d("myLogs","StartTimer")
         stopwatch.isStarted = true
         timer?.cancel()                                                 // Отмена отсчёта
         timer = getCountTimer(stopwatch)                                // получаем экземпляр таймера ( с сохранённым отсчётом )
@@ -81,7 +73,7 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         timer?.cancel()
         stopwatch.isStarted = false
         stopwatch.currentMs = stopwatch.msInFuture
-        Log.d("myLogs","resetTimerMain current: ${stopwatch.currentMs}, inFuture: ${stopwatch.msInFuture}")
+      //  Log.d("myLogs","resetTimerMain current: ${stopwatch.currentMs}, inFuture: ${stopwatch.msInFuture}")
         isTimerStarted = stopwatch.isStarted
         startedStopwatchID = -1
         changeStopwatch(stopwatch)
@@ -93,7 +85,7 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         stopwatch.currentMs = stopwatch.msInFuture
         stopwatch.isStartedByButton = false
         stopwatch.isStarted = false
-        changeStopwatch(stopwatch)
+        stopwatchAdapter.notifyItemChanged(stopwatch.adapterPosition, FINISH)
 
     }
     private fun getCountTimer(stopwatch: Stopwatch): CountDownTimer{
@@ -112,22 +104,25 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
 
     override fun start(stopwatch: Stopwatch) {
         if(isTimerStarted && startedStopwatchID != stopwatch.adapterPosition){
-             stopwatchAdapter.notifyItemChanged(startedStopwatchID,STOP_OLD)
+            stopwatchAdapter.notifyItemChanged(startedStopwatchID,STOP_OLD)
             startedStopwatchID = -1
         }
+
+        if(stopwatch.isFinished) stopwatch.isFinished = false
+
         startTimer(stopwatch)
-        Log.d("myLogs","----------------------")
-        stopwatches.forEach { Log.d("myLogs","$it") }
+      //  Log.d("myLogs","----------------------")
+        //stopwatches.forEach { Log.d("myLogs","$it") }
     }
     override fun stop(stopwatch: Stopwatch) {
-        Log.d("myLogs","stopBTN(Main)")
+        //Log.d("myLogs","stopBTN(Main)")
         stopTimer(stopwatch)
-        Log.d("myLogs","----------------------")
+      //  Log.d("myLogs","----------------------")
         stopwatches.forEach { Log.d("myLogs","$it") }
     }
     override fun reset(stopwatch: Stopwatch) {
         resetTimer(stopwatch)
-        Log.d("myLogs","----------------------")
+       // Log.d("myLogs","----------------------")
         stopwatches.forEach { Log.d("myLogs","$it") }
     }
     override fun delete(stopwatch: Stopwatch) {
@@ -160,5 +155,7 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         const val TIME_CHANGED = 1
         const val CHANGE_BUTTON = 2
         const val STOP_OLD = 3
+        const val FINISH = 4
+
     }
 }
