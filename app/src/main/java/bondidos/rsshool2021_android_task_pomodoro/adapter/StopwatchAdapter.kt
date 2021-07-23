@@ -26,98 +26,74 @@ class StopwatchAdapter(
         val binding = StopwatchItemBinding.inflate(layoutInflater,parent,false)
         val holder = StopwatchViewHolder(listener, binding.root.context.resources,binding)
         val position = holder.adapterPosition
+        with(holder){
+            startPauseButton.setOnClickListener {
+                if(adapterPosition != RecyclerView.NO_POSITION){
+                    if (stopwatch.isStarted) {
+                        stopTimer(stopwatch)
+                        Log.d("myLogs", "stop(adapter)")
+
+                    } else {
+                        startTimer(stopwatch)
+                        Log.d("myLogs", "start(adapter)")
+                    }
+                }
+            }
+            deleteButton.setOnClickListener {
+                if(adapterPosition != RecyclerView.NO_POSITION){
+                    Log.d("myLogs", "deleteButton(Adapter)")
+                    listener.delete(stopwatch)
+                }
+            }
+        }
+
         return holder
+    }
+
+    override fun getItemId(position: Int): Long {
+        return stopwatches[position].id.toLong()
+    }
+
+    override fun onViewRecycled(holder: StopwatchViewHolder) {
+        holder.stopwatch.currentMs = holder.stopwatch.msInFuture
+        holder.changeBackgroundToStandard()
+        holder.startPauseButton.text = "Start"
+        super.onViewRecycled(holder)
     }
 
 
     override fun onBindViewHolder(holder: StopwatchViewHolder,position: Int, payloads: MutableList<Any>){                   // вызывается в момент создания айтема, в моменты пересоздания
         val stopwatchItem = getItem(position)
-        //var fullRefresh = payloads.isEmpty()
-       // if(!payloads.isEmpty()) {
-            if (stopwatchItem.isStarted) {
-                holder.setIsRecyclable(false)
-                holder.setCurrentMs(stopwatchItem)
-                runBlocking { holder.stepFillingCircle() }
-          //  }
-        }   else holder.setIsRecyclable(true)
 
-        if(!stopwatchItem.isStarted && holder.runFlag){
-            holder.stopTimer(stopwatchItem)
-        }
+
+        stopwatchItem.adapterPosition = holder.adapterPosition
+
+        /** Обработка собития конца счёта */
         if(stopwatchItem.isFinished){
             holder.changeBackgroundToRed()
         }
-
-
-        if(stopwatchItem.currentMs == stopwatchItem.msInFuture) {
-            holder.bind(stopwatchItem)
-            Log.d("myLogs", "Full refresh in adapter")
+        if (stopwatchItem.isStarted && stopwatchItem.isFinished) {
+            holder.changeBackgroundToStandard()
+            stopwatchItem.isFinished = false
         }
-/*
 
-        with(holder){
-            startPauseButton.setOnClickListener {
-                if(!stopwatchItem.isStarted) {
-                    listener.start(stopwatchItem.id)
-                    startTimer()
-                    runFlag = true
-                    Log.d("myLogs","start(Adapter)")
-                } else {
-                    listener.stop(stopwatchItem.id)
-                    stopTimer()
-                    runFlag = false
-                    Log.d("myLogs","stop(Adapter)")
-                }
-            }
-            restartButton.setOnClickListener {
-                listener.reset(stopwatchItem.id)
-                android.util.Log.d("myLogs","restartButton(Adapter)")
-            }
-            deleteButton.setOnClickListener {
-                android.util.Log.d("myLogs","deleteButton(Adapter)")
-                listener.delete(stopwatchItem.id)
-            }
-        }*/
-
-                                                                                                // (например, айтем вышел за пределы экрана, затем вернулся) и
-        //в моменты обновления айтемов (этим у нас занимается DiffUtil)
-
-       // Log.d("myLogs", "onBindViewHolder (BIG) payloads:${fullRefresh}")
-
-       // payloads.forEach {Log.d("myLogs", "payloads item: $it")  }
-       /* if(payloads.isNotEmpty()){
+       // payloads.forEach { Log.d("myLogs","$it") }
+        if(payloads.isNotEmpty()){
             payloads.forEach{ payload ->
                 when(payload){
-                    Stopwatch.ITEM_STARTED_CHANGE -> {
-                      //  Log.d("myLogs", "ITEM_STARTED_CHANGE case in adapter")
-                        holder.startPauseButton.callOnClick()
-
-                    }
-                    Stopwatch.ITEM_MS_CHANGED -> {
-                    //    Log.d("myLogs", "ITEM_MS_CHANGED case in adapter")
+                    TIME_CHANGED -> {
                         holder.setCurrentMs(stopwatchItem)
-                       // stopwatchItem.isStarted = true
                         runBlocking { holder.stepFillingCircle() }
-                        if(!stopwatchItem.isStarted && holder.runFlag){
-                            listener.stop(stopwatchItem.id)
-                            holder.stopTimer()
-                            holder.runFlag = false
-                            Log.d("myLogs", "STOP_AFTER ITEM_CHANGED case in adapter")
-                        }
-                        //stopwatchItem.currentMs = stop.
+                        Log.d("myLogs","TIME_CHANGED ${stopwatchItem.id} in ${stopwatchItem.currentMs}")
                     }
-
-                    else -> fullRefresh = true
+                    CHANGE_BUTTON -> {
+                        Log.d("myLogs","CHANGE_BUTTON ${stopwatchItem.id} in ${stopwatchItem.currentMs}")
+                    }
                 }
             }
+
         }
-
-        if(fullRefresh){
-
-            holder.bind(stopwatchItem)
-            Log.d("myLogs", "Full refresh in adapter")
-        }*/
-
+        else holder.bind(stopwatchItem)
 
 }
 
@@ -126,5 +102,9 @@ class StopwatchAdapter(
         //holder.bind(getItem(position))
         Log.d("myLogs", "onBindViewHolder(second) in adapter")
         onBindViewHolder(holder, position, mutableListOf())
+    }
+    companion object{
+        const val TIME_CHANGED = 1
+        const val CHANGE_BUTTON = 2
     }
 }

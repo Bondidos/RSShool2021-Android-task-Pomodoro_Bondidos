@@ -28,37 +28,37 @@ class StopwatchViewHolder(
 
     /**-------------------------------------------------------*/
     val startPauseButton = binding.startPauseButton
-    val restartButton = binding.restartButton
     val blinkingIndicator = binding.blinkingIndicator
     val deleteButton = binding.deleteButton
     val customViewOne = binding.customViewOne
     val customViewTwo = binding.customViewTwo
     var runFlag = false
+    private var stopwatch_: Stopwatch? = null
+    val stopwatch get() = requireNotNull(stopwatch_)
+
 
 
     fun bind(stopwatch: Stopwatch) {                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
 
         /** инициализация при первом БИНД*/
-
-            initButtonsListeners(stopwatch)
+            stopwatch_ = stopwatch
+            //initButtonsListeners(stopwatch)
             initFillingCircle(stopwatch.msInFuture)
             binding.stopwatchTimer.text = stopwatch.currentMs.displayTime()
-
 
 
     //  пока просто выводим время секундомера.
     }
 
-    private fun startTimer(stopwatch: Stopwatch) {
+    fun startTimer(stopwatch: Stopwatch) {
         /** Так как холдер будет обновляться раз в 10мс, то надо предусмотреть случай, если отсчёт уже запущен.
          * То есть нам не нужно включать анимацию и менять иконку кнопки старт/стоп */
         //if (!binding.blinkingIndicator.isActivated) {                                               // проверяем статус индикатора (запущен или нет)
 
         listener.start(stopwatch)
         runFlag = true
+        binding.startPauseButton.text = "STOP"
 
-        val drawable = resources.getDrawable(R.drawable.ic_baseline_pause_24)                   // находим иконку паузы
-        binding.startPauseButton.setImageDrawable(drawable)                                     // меняем иконку кнопки пока идёт отсчёт
         binding.blinkingIndicator.isInvisible = false                                           // включаем отображение индикатора
         (binding.blinkingIndicator.background as? AnimationDrawable)?.start()                   // включаем анимацию индикатора
         //  }
@@ -68,9 +68,8 @@ class StopwatchViewHolder(
 
         listener.stop(stopwatch)
         runFlag = false
+        binding.startPauseButton.text = "START"
 
-        val drawable = resources.getDrawable(R.drawable.ic_baseline_play_arrow_24)                  // меняем иконку кнопки
-        binding.startPauseButton.setImageDrawable(drawable)
         binding.blinkingIndicator.isInvisible = true                                                // выключаем отображение индикатора
         (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()                        // выключаем анимацию индикатора
     }
@@ -99,16 +98,12 @@ class StopwatchViewHolder(
     fun changeBackgroundToRed() {
         binding.root.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.blinkingIndicator.setBackgroundColor(resources.getColor(R.color.red_second))
-        binding.startPauseButton.setBackgroundColor(resources.getColor(R.color.red_second))
-        binding.restartButton.setBackgroundColor(resources.getColor(R.color.red_second))
         binding.deleteButton.setBackgroundColor(resources.getColor(R.color.red_second))
     }
 
     fun changeBackgroundToStandard() {
         binding.root.setBackgroundColor(Color.WHITE)
         binding.blinkingIndicator.setBackgroundColor(Color.WHITE)
-        binding.startPauseButton.setBackgroundColor(Color.WHITE)
-        binding.restartButton.setBackgroundColor(Color.WHITE)
         binding.deleteButton.setBackgroundColor(Color.WHITE)
     }
 
@@ -128,9 +123,9 @@ class StopwatchViewHolder(
         val h = this / 1000 / 3600
         val m = this / 1000 % 3600 / 60
         val s = this / 1000 % 60
-        val ms = this % 1000 / 10
+        //val ms = this % 1000 / 10
 
-        return "${displaySlot(h)}:${displaySlot(m)}:${displaySlot(s)}:${displaySlot(ms)}"
+        return "${displaySlot(h)}:${displaySlot(m)}:${displaySlot(s)}"//:${displaySlot(ms)
     }
 
     private fun displaySlot(count: Long): String {
@@ -152,11 +147,6 @@ class StopwatchViewHolder(
                 Log.d("myLogs","start(holder)")
             }
         }
-        restartButton.setOnClickListener {
-            listener.reset(stopwatch)
-            stopTimer(stopwatch)
-            Log.d("myLogs","restartButton(Adapter)")
-        }
         deleteButton.setOnClickListener {
             Log.d("myLogs","deleteButton(Adapter)")
             listener.delete(stopwatch)
@@ -164,7 +154,7 @@ class StopwatchViewHolder(
     }
 
     companion object {
-        private const val START_TIME = "00:00:00:00"
+        private const val START_TIME = "00:00:00"
         private const val STEP_MS = 1000L
         private const val myLogs = "myLogs"
     }

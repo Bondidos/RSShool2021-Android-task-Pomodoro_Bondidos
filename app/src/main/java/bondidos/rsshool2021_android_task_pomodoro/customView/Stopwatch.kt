@@ -37,20 +37,38 @@ data class Stopwatch(
                 oldItem.currentMs == newItem.currentMs && oldItem.id == newItem.id
             }
 
-            override fun getChangePayload(oldItem: Stopwatch, newItem: Stopwatch) =
-                if (oldItem.currentMs != newItem.currentMs)  ITEM_MS_CHANGED else null
+            override fun getChangePayload(oldItem: Stopwatch, newItem: Stopwatch) :MutableList<Any>{
+                val result = mutableListOf<Any>()
+                if (oldItem.currentMs != newItem.currentMs) {
+                    result.add(ITEM_MS_CHANGED)
+                    //result.add(ITEM_MS_CHANGED)
+                }
+                //  if (oldItem.currentMs != newItem.currentMs)                     ITEM_MS_CHANGED
+
+                if (oldItem.isStarted != newItem.isStarted) {
+                    result.add(ITEM_STARTED_CHANGE)
+                }
+                // else -> null
+                return  result
+            }
+
+             /*when{
+                 oldItem.currentMs != newItem.currentMs -> ITEM_MS_CHANGED
+                 oldItem.isStarted != newItem.isStarted -> ITEM_STARTED_CHANGE
+                 else -> null
+             }*/
 
                 /*val result = mutableListOf<Any>()
                 if (oldItem.isStarted != newItem.isStarted) {
                     result.add(ITEM_FINISHED)
-                }*/
+                }
               //  if (oldItem.currentMs != newItem.currentMs)                     ITEM_MS_CHANGED
 
-                /*if (oldItem.isFinished != newItem.isFinished) {
+                if (oldItem.isFinished != newItem.isFinished) {
                     result.add(ITEM_FINISHED)
-                }*/
+                }
                 // else -> null
-                /*return  result*/
+                return  result*/
 
         }
    }

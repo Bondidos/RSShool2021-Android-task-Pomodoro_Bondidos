@@ -12,6 +12,4 @@ interface StopwatchListener {
 
     fun delete(stopwatch: Stopwatch)
 
-    // todo fun finish uses for change color of finished count view
-    fun fin(stopwatch: Stopwatch)
 }
