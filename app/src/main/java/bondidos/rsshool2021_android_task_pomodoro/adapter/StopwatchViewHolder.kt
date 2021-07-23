@@ -21,22 +21,16 @@ class StopwatchViewHolder(
                                                                         // RecyclerView
     ): RecyclerView.ViewHolder(binding.root) {                          // передаем ссылку на View данного элемента RecyclerView
 
-    var current = 0L                                             //todo for circle // start of countdown?
-    /** пробую новый холдер*/
-    /**--------------------------------------------------*/
 
-
-    /**-------------------------------------------------------*/
     val startPauseButton = binding.startPauseButton
     val blinkingIndicator = binding.blinkingIndicator
     val deleteButton = binding.deleteButton
     val customViewOne = binding.customViewOne
     val customViewTwo = binding.customViewTwo
-    var runFlag = false
     private var stopwatch_: Stopwatch? = null
     val stopwatch get() = requireNotNull(stopwatch_)
-
-
+    var isAnimationStarted = false
+    var current = 0L
 
     fun bind(stopwatch: Stopwatch) {                                    //  в метод bind передаем экземпляр Stopwatch, он приходит к нам из метода
 
@@ -49,6 +43,8 @@ class StopwatchViewHolder(
 
     //  пока просто выводим время секундомера.
     }
+    fun getAdapterPos() = adapterPosition
+
 
     fun startTimer(stopwatch: Stopwatch) {
         /** Так как холдер будет обновляться раз в 10мс, то надо предусмотреть случай, если отсчёт уже запущен.
@@ -56,9 +52,9 @@ class StopwatchViewHolder(
         //if (!binding.blinkingIndicator.isActivated) {                                               // проверяем статус индикатора (запущен или нет)
 
         listener.start(stopwatch)
-        runFlag = true
-        binding.startPauseButton.text = "STOP"
 
+        binding.startPauseButton.text = "STOP"
+        isAnimationStarted =true
         binding.blinkingIndicator.isInvisible = false                                           // включаем отображение индикатора
         (binding.blinkingIndicator.background as? AnimationDrawable)?.start()                   // включаем анимацию индикатора
         //  }
@@ -67,16 +63,23 @@ class StopwatchViewHolder(
     fun stopTimer(stopwatch: Stopwatch) {
 
         listener.stop(stopwatch)
-        runFlag = false
-        binding.startPauseButton.text = "START"
 
+        binding.startPauseButton.text = "START"
+        isAnimationStarted = false
+        binding.blinkingIndicator.isInvisible = true                                                // выключаем отображение индикатора
+        (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()                        // выключаем анимацию индикатора
+    }
+    fun stopAnimation(stopwatch: Stopwatch){
+        stopwatch.isStarted = false
+        isAnimationStarted = true
+        binding.startPauseButton.text = "START"
         binding.blinkingIndicator.isInvisible = true                                                // выключаем отображение индикатора
         (binding.blinkingIndicator.background as? AnimationDrawable)?.stop()                        // выключаем анимацию индикатора
     }
 
+
     fun initFillingCircle(msInFuture: Long) {
-        if (current != 0L)
-            current = 0L
+
 
         binding.customViewOne.setPeriod(msInFuture)                                                 // устанавливаем период для заполняющегося круга
         binding.customViewTwo.setPeriod(msInFuture)

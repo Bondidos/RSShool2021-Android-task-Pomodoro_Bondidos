@@ -26,7 +26,7 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
      private val stopwatches = mutableListOf<Stopwatch>()
      private var nextId = 0
      private var isTimerStarted = false
-    //private var startedStopwatchID = -1
+     private var startedStopwatchID = -1
     // private lateinit var listener: MainListener
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,14 +52,13 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
             stopwatches.add(Stopwatch(nextId++,
                 isStartedByButton = false,
                 adapterPosition = -10,
-                /*countDownTime*/10000L,
-                /*countDownTime*/10000L,
+                /*countDownTime*/60000L,
+                /*countDownTime*/60000L,
                 isStarted = false,
                 isFinished = false
             ))    // добавляем созданный таймер в список
             stopwatchAdapter.submitList(stopwatches.toList())                // передаём список с таймерамы в RecyclerView
-            Log.d("myLogs","----------------------")
-            stopwatches.forEach { Log.d("myLogs","$it") }
+
         }
 
     }
@@ -74,12 +73,13 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         timer?.start()                                                  // Старт отсчёта
         isTimerStarted = stopwatch.isStarted
         //startedStopwatchID = stopwatch.id
+        startedStopwatchID = stopwatch.adapterPosition
     }
 
     private fun stopTimer(stopwatch: Stopwatch){
         timer?.cancel()
         stopwatch.isStarted = false
-        //startedStopwatchID = -1
+        startedStopwatchID = -1
         isTimerStarted = stopwatch.isStarted
         changeStopwatch(stopwatch)
     }
@@ -89,11 +89,12 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
         stopwatch.currentMs = stopwatch.msInFuture
         Log.d("myLogs","resetTimerMain current: ${stopwatch.currentMs}, inFuture: ${stopwatch.msInFuture}")
         isTimerStarted = stopwatch.isStarted
-        //startedStopwatchID = -1
+        startedStopwatchID = -1
         changeStopwatch(stopwatch)
         //stopwatchAdapter.notifyItemChanged(stopwatches.indexOf(stopwatch))
     }
     private fun finish(stopwatch: Stopwatch){
+        startedStopwatchID = -1
         isTimerStarted = false
         stopwatch.isFinished = true
         stopwatch.currentMs = stopwatch.msInFuture
@@ -110,7 +111,7 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
             override fun onTick(millisUntilFinished: Long) {
                 // Log.d("myLogs","${watch.currentMs} listItem = ${stopwatches[stopwatch.id].currentMs}")
                 stopwatch.currentMs = millisUntilFinished
-                stopwatchAdapter.notifyItemChanged(stopwatch.id, TIME_CHANGED)
+                stopwatchAdapter.notifyItemChanged(stopwatch.adapterPosition, TIME_CHANGED)
                 //changeStopwatch(stopwatch)
             }
             override fun onFinish() {
@@ -121,39 +122,51 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
 
 
     override fun start(stopwatch: Stopwatch) {
-        if(isTimerStarted){
-            //isTimerStarted = false
+        if(isTimerStarted && startedStopwatchID != stopwatch.adapterPosition){
+            //вызвать кнопку стоп
+             stopwatchAdapter.notifyItemChanged(startedStopwatchID,STOP_OLD)
+            startedStopwatchID = -1
         }
         startTimer(stopwatch)
-
-        }
+        Log.d("myLogs","----------------------")
+        stopwatches.forEach { Log.d("myLogs","$it") }
+    }
 
 
     override fun stop(stopwatch: Stopwatch) {
         Log.d("myLogs","stopBTN(Main)")
         stopTimer(stopwatch)
+        Log.d("myLogs","----------------------")
+        stopwatches.forEach { Log.d("myLogs","$it") }
     }
 
     override fun reset(stopwatch: Stopwatch) {
         resetTimer(stopwatch)
+        Log.d("myLogs","----------------------")
+        stopwatches.forEach { Log.d("myLogs","$it") }
     }
 
     override fun delete(stopwatch: Stopwatch) {
-      /*  if(startedStopwatchID == stopwatch.id){
-            timer?.cancel()
-            startedStopwatchID = -1
-        }*/
-        timer?.cancel()
-        stopwatches.remove(stopwatch)
-        stopwatchAdapter.submitList(stopwatches.toList())
+      if(isTimerStarted && startedStopwatchID == stopwatch.adapterPosition){
+
+          //вызвать кнопку стоп
+          timer?.cancel()
+          startedStopwatchID = -1
+      }
+       // stopwatchAdapter.notifyItemChanged(stopwatch.id,DELETED)
         Log.d("myLogs","----------------------")
         stopwatches.forEach { Log.d("myLogs","$it") }
+        val index = stopwatch.adapterPosition
+
+        stopwatches.removeAt(stopwatch.adapterPosition)
+        stopwatches.forEach { if (it.adapterPosition > index) it.adapterPosition -= 1 }
+        stopwatchAdapter.submitList(stopwatches.toList())
 
     }
     /**---------------------------------------InWork----------------------------------------*/
 
 
-    private fun MutableList<Stopwatch>.findById(id: Int) = this.find { it.id == id } ?: throw Exception ("ItemNotFound")
+   // private fun MutableList<Stopwatch>.findById(id: Int) = this.find { it.id == id } ?: throw Exception ("ItemNotFound")
 
     private fun changeStopwatch (stopwatch: Stopwatch){
 
@@ -161,13 +174,16 @@ class MainActivity : AppCompatActivity(), StopwatchListener {
                 it.id == stopwatch.id
             })] = stopwatch.copy()
             stopwatchAdapter.submitList(stopwatches.toList())*/
-        stopwatchAdapter.notifyItemChanged(stopwatch.id)
+       // stopwatchAdapter.notifyItemChanged(stopwatch.id)
+        stopwatchAdapter.notifyItemChanged(stopwatch.adapterPosition, CHANGE_BUTTON)
 
     }
     companion object{
         private const val STEP_MS = 1000L
         const val TIME_CHANGED = 1
         const val CHANGE_BUTTON = 2
+        const val STOP_OLD = 3
+        const val DELETED = 4
     }
 }
 /**
