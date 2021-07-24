@@ -134,10 +134,12 @@ class MainActivity : AppCompatActivity(), StopwatchListener, LifecycleObserver {
 
     override fun start(stopwatch: Stopwatch) {
         if(isTimerStarted && startedStopwatchID != stopwatch.adapterPosition){
+            val aa= stopwatches.find { it.adapterPosition == startedStopwatchID }
+            aa?.isStarted = false
             stopwatchAdapter.notifyItemChanged(startedStopwatchID,STOP_OLD)
             startedStopwatchID = -1
         }
-
+        stopwatches.find { it.adapterPosition == startedStopwatchID }
         if(stopwatch.isFinished) stopwatch.isFinished = false
 
         startTimer(stopwatch)
