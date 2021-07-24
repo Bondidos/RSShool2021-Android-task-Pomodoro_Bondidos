@@ -8,11 +8,13 @@ android {
     buildToolsVersion "30.0.3"
 
     defaultConfig {
-        applicationId "com.example.customview"
+        applicationId 'com.example.Pomodoro'
         minSdk 22
         targetSdk 30
         versionCode 1
         versionName "1.0"
+        targetSdkVersion defaultTargetSdkVersion
+        minSdkVersion 29
     }
 
     compileOptions {
@@ -36,4 +38,5 @@ dependencies {
 
     // coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.1-native-mt'
+    implementation 'androidx.lifecycle:lifecycle-process:2.3.1'
 }

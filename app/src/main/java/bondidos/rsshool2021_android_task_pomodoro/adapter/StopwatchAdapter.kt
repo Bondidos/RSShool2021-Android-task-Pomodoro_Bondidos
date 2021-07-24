@@ -14,9 +14,6 @@ class StopwatchAdapter(
     private val listener: StopwatchListener,
     private val stopwatches: List<Stopwatch>
 ): ListAdapter<Stopwatch, StopwatchViewHolder>(Stopwatch.itemComparator){
-    private var position_: Int? = null
-    val position get() =position_
-
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): StopwatchViewHolder{
         // инфлейтим View и возвращаем созданный ViewHolder
@@ -29,17 +26,17 @@ class StopwatchAdapter(
                 if(adapterPosition != RecyclerView.NO_POSITION){
                     if (stopwatch.isStarted) {
                         stopTimer(stopwatch)
-                        Log.d("myLogs", "stop(adapter)")
+                        //Log.d("myLogs", "stop(adapter)")
 
                     } else {
                         startTimer(stopwatch)
-                        Log.d("myLogs", "start(adapter)")
+                        //Log.d("myLogs", "start(adapter)")
                     }
                 }
             }
             deleteButton.setOnClickListener {
                 if(adapterPosition != RecyclerView.NO_POSITION){
-                    Log.d("myLogs", "deleteButton(Adapter)")
+                    //Log.d("myLogs", "deleteButton(Adapter)")
                     listener.delete(stopwatch)
                 }
             }
@@ -52,22 +49,11 @@ class StopwatchAdapter(
         return stopwatches[position].id.toLong()
     }
 
-    override fun onViewRecycled(holder: StopwatchViewHolder) {
-        Log.d("myLogs","onViewRecycled =========================>>>>>")
-        /*holder.stopwatch.currentMs = holder.stopwatch.msInFuture
-        holder.stopwatch.isStarted = false
-        holder.startPauseButton.text = "Start"
-*/
-        super.onViewRecycled(holder)
-        Log.d("myLogs","onViewRecycled <<<<==========================")
-    }
-
     override fun onViewAttachedToWindow(holder: StopwatchViewHolder) {
-        Log.d("myLogs","onViewAttachedToWindow ")
-        /** ----------------------------------------------*/
-        //todo turn on animation om blinking circle
+       // Log.d("myLogs","onViewAttachedToWindow ")
         if(holder.stopwatch.isStarted){
             holder.startAnimation()
+            holder.startPauseButton.text = "Stop"
         } else holder.stopAnimation()
 
         if(holder.stopwatch.isFinished){
@@ -78,17 +64,14 @@ class StopwatchAdapter(
             holder.stopAnimation()
             holder.changeButtonNameToStart()
         }
-
-
-        /**---------------------------------------------------*/
-        holder.stopwatch.adapterPosition = holder.adapterPosition //todo important!!!
+        holder.stopwatch.adapterPosition = holder.adapterPosition
         super.onViewAttachedToWindow(holder)
     }
 
     override fun onViewDetachedFromWindow(holder: StopwatchViewHolder) {
-
-
-       // Log.d("myLogs","onViewDetachedFromWindow ")
+        holder.changeButtonNameToStart()
+        holder.stopAnimation()
+        holder.stopwatch.adapterPosition = holder.adapterPosition
         super.onViewDetachedFromWindow(holder)
     }
 
@@ -97,14 +80,6 @@ class StopwatchAdapter(
 
         stopwatchItem.adapterPosition = holder.adapterPosition
 
-        /** Обработка собития конца счёта */
-
-       /* if (stopwatchItem.isStarted && stopwatchItem.isFinished) {
-            holder.changeBackgroundToStandard()
-            stopwatchItem.isFinished = false
-            Log.d("myLogs","обновление окраски на стандарт ")
-        }*/
-
        // payloads.forEach { Log.d("myLogs","$it") }
         if(payloads.isNotEmpty()){
             payloads.forEach{ payload ->
@@ -112,11 +87,10 @@ class StopwatchAdapter(
                     TIME_CHANGED -> {
                         holder.setCurrentMs(stopwatchItem)
                         runBlocking { holder.stepFillingCircle(stopwatchItem) }
-
                       //  Log.d("myLogs","TIME_CHANGED ${stopwatchItem.adapterPosition} in ${stopwatchItem.currentMs}")
                     }
                     CHANGE_BUTTON -> {
-                        Log.d("myLogs","CHANGE_BUTTON position: ${stopwatchItem.adapterPosition} in ${stopwatchItem.currentMs}")
+                        //Log.d("myLogs","CHANGE_BUTTON position: ${stopwatchItem.adapterPosition} in ${stopwatchItem.currentMs}")
                         holder.changeButtonNameToStart()
                     }
                     STOP_OLD  -> {
@@ -125,23 +99,18 @@ class StopwatchAdapter(
                         holder.stopOldButton()
                     }
                     FINISH -> {
-                        Log.d("myLogs","FINISH position: ${stopwatchItem.adapterPosition} in ${stopwatchItem.currentMs}")
+                      //  Log.d("myLogs","FINISH position: ${stopwatchItem.adapterPosition} in ${stopwatchItem.currentMs}")
                         runBlocking { holder.stepFillingCircle(stopwatchItem) }
                         holder.onFinish(stopwatchItem)
                     }
-
                 }
             }
-
         }
-        else holder.bind(stopwatchItem).run{
-            Log.d("myLogs","bindHolder FULL ")
-        }
+        else holder.bind(stopwatchItem)
 }
 
     override fun onBindViewHolder(holder: StopwatchViewHolder, position: Int) {
-        //holder.bind(getItem(position))
-        Log.d("myLogs", "onBindViewHolder(second) in adapter")
+       // Log.d("myLogs", "onBindViewHolder(second) in adapter")
         onBindViewHolder(holder, position, mutableListOf())
     }
     companion object{

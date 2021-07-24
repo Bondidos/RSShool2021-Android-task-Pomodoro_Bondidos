@@ -5,6 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -18,14 +19,16 @@
         tools:listitem="@layout/stopwatch_item">
 
     </androidx.recyclerview.widget.RecyclerView>
+
     <EditText
         android:id="@+id/editText"
-        android:layout_height="wrap_content"
         android:layout_width="100dp"
+        android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:inputType="number"
         android:autofillHints="@string/add_stopwatch"
-        android:hint="Minutes"
+        android:hint="@string/_00_00_00_00"
+        android:inputType="number"
+        android:maxLength="4"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/add_new_stopwatch_button"
         app:layout_constraintStart_toStartOf="parent">
